@@ -1,0 +1,13 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" loaded="pageLoaded">
+  <ActionBar title="Spotify Demo" backgroundColor="#000" color="#fff"/>
+  <GridLayout rows="*,auto">
+    <StackLayout row="0">
+      <Button text="Spotify Login" tap="{{login}}" />
+      <Button text="Stream Track" tap="{{playTrack}}" />
+    </StackLayout>
+    <StackLayout row="1" class="grey">
+      <HtmlView html="{{footerNote}}" class="footer"/>
+    </StackLayout>
+  </GridLayout>
+
+</Page>

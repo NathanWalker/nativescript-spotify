@@ -1,0 +1,16 @@
+{
+  "nativescript": {
+    "id": "org.nativescript.demo",
+    "tns-ios": {
+      "version": "1.5.2"
+    }
+  },
+  "dependencies": {
+    "nativescript-spotify": "file:..",
+    "tns-core-modules": "latest"
+  },
+  "devDependencies": {
+    "nativescript-dev-typescript": "^0.2.3",
+    "typescript": "^1.7.5"
+  }
+}

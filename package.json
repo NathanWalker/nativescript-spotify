@@ -1,0 +1,35 @@
+{
+  "name": "nativescript-spotify",
+  "version": "1.0.0",
+  "description": "Spotify for your NativeScript app.",
+  "main": "spotify.js",
+  "nativescript": {
+   "platforms": {
+      "android": "0.0.1",
+      "ios": "0.0.1"
+   }
+  },
+  "scripts": {
+    "build": "tsc spotify.ios.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NathanWalker/nativescript-spotify.git"
+  },
+  "keywords": [
+    "NativeScript", "Spotify", "Music", "JavaScript", "Android", "iOS"
+  ],
+  "author": {
+    "name": "Nathanael Walker",
+    "email": "walkerrunpdx@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/NathanWalker/nativescript-spotify/issues"
+  },
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/NathanWalker/nativescript-spotify/blob/master/LICENSE"
+  },
+  "homepage": "https://github.com/NathanWalker/nativescript-spotify",
+  "readmeFilename": "README.md"
+}

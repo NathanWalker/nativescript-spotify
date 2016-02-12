@@ -1,0 +1,19 @@
+android {
+    productFlavors {
+        "nativescriptspotify" {
+            dimension "nativescriptspotify"
+        }
+    }
+}
+
+dependencies {
+      def supportVer = "22.2.0";
+
+      if(project.hasProperty("supportVersion")) {
+       supportVer = supportVersion
+      }
+
+	 compile "com.spotify.sdk:spotify-auth:1.0.0-beta12@aar"
+   compile "com.spotify.sdk:spotify-player:1.0.0-beta12@aar"
+   compile "com.android.support:appcompat-v7:$supportVer"
+}

@@ -1,0 +1,6 @@
+*.js
+node_modules
+demo/platforms
+demo/hooks
+demo/references.d.ts
+demo/tsconfig.json
