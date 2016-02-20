@@ -1,4 +1,6 @@
-demo/
-screenshots/
+demo
+docs
+resources
 *.png
+*.jpg
 CONTRIBUTING.md
