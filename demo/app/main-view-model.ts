@@ -1,18 +1,18 @@
-import Observable = require("data/observable");
-import {Spotify, SpotifyNotificationObserver} from 'nativescript-spotify';
+import {Observable} from 'data/observable';
+import {NSSpotify, SpotifyNotificationObserver} from 'nativescript-spotify';
 
 export class SpotifyDemo extends Observable {
   public footerNote: string = "<span style='font-family: sans-serif;'>Demo by <a href='https://github.com/NathanWalker'>Nathan Walker</a></span>";
-  public spotify: Spotify;
+  public spotify: NSSpotify;
   public loggedIn: boolean = false;
 
   constructor() {
-    // super();
+    super();
     
     var observer = SpotifyNotificationObserver.new().initWithCallback(this.loginSuccess);
     NSNotificationCenter.defaultCenter().addObserverSelectorNameObject(observer, 'onReceive', 'SpotifyLoginSuccess', null);
     
-    this.spotify = new Spotify();
+    this.spotify = new NSSpotify();
     if (this.spotify.isLoggedIn()) {
       this.loggedIn = true;
     } 

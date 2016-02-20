@@ -1,6 +1,10 @@
 *.js
+*.js.map
 node_modules
 demo/platforms
 demo/hooks
+demo/lib
+demo/metadata-i386
 demo/references.d.ts
 demo/tsconfig.json
+*.log

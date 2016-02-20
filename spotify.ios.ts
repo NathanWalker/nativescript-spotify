@@ -19,7 +19,7 @@ export class SpotifyNotificationObserver extends NSObject {
   };
 }
 
-export class Spotify extends NSObject {// implements SPTAudioStreamingPlaybackDelegate {
+export class NSSpotify {//implements SPTAudioStreamingPlaybackDelegate {
   // public static ObjCProtocols = [SPTAudioStreamingPlaybackDelegate];
   public static CLIENT_ID: string;
   public static REDIRECT_URL: string;
@@ -30,14 +30,15 @@ export class Spotify extends NSObject {// implements SPTAudioStreamingPlaybackDe
   
   public static HANDLE_AUTH_CALLBACK(url) {
     // Ask SPTAuth if the URL given is a Spotify authentication callback
-    if (SPTAuth.defaultInstance().canHandleURLWithDeclaredRedirectURL(url, NSURL.URLWithString(Spotify.REDIRECT_URL))) { 
-      SPTAuth.defaultInstance().handleAuthCallbackWithTriggeredAuthURLCallback(url, null, (error, session) => {
+    // if (SPTAuth.defaultInstance().canHandleURLWithDeclaredRedirectURL(url, NSURL.URLWithString(NSSpotify.REDIRECT_URL))) { 
+    if (SPTAuth.defaultInstance().canHandleURL(url)) { 
+      SPTAuth.defaultInstance().handleAuthCallbackWithTriggeredAuthURLCallback(url, (error, session) => {
         if (error != null) {
             console.log(`*** Auth error: ${error}`);
             return;
         }
         
-        Spotify.SAVE_SESSION(session);
+        NSSpotify.SAVE_SESSION(session);
         
         NSNotificationCenter.defaultCenter().postNotificationNameObject(`SpotifyLoginSuccess`, null);
              
@@ -47,7 +48,7 @@ export class Spotify extends NSObject {// implements SPTAudioStreamingPlaybackDe
   }
   
   public static SAVE_SESSION(session) {
-    Spotify.SESSION = session;
+    NSSpotify.SESSION = session;
     let userDefaults = NSUserDefaults.standardUserDefaults();
     let sessionData = NSKeyedArchiver.archivedDataWithRootObject(session);
     userDefaults.setObjectForKey(sessionData, `SpotifySession`);
@@ -55,7 +56,6 @@ export class Spotify extends NSObject {// implements SPTAudioStreamingPlaybackDe
   }
   
   constructor() {
-    super();
     let userDefaults = NSUserDefaults.standardUserDefaults();
     let sessionObj = userDefaults.objectForKey(`SpotifySession`);
     if (sessionObj) {
@@ -67,13 +67,13 @@ export class Spotify extends NSObject {// implements SPTAudioStreamingPlaybackDe
       let session = NSKeyedArchiver.unarchiveObjectWithData(sessionData);//<SPTSession>
       if (!session.isValid()) {
         // renew session
-        SPTAuth.defaultInstance().renewSessionWithServiceEndpointAtURLCallback(session, NSURL.URLWithString(Spotify.TOKEN_REFRESH_ENDPOINT), (error, session) => {
+        SPTAuth.defaultInstance().renewSessionWithServiceEndpointAtURLCallback(session, NSURL.URLWithString(NSSpotify.TOKEN_REFRESH_ENDPOINT), (error, session) => {
           if (error != null) {
             console.log(`*** Renew session error: ${error}`);
             return;
           }
           
-          Spotify.SAVE_SESSION(session);
+          NSSpotify.SAVE_SESSION(session);
         });
       } 
     } else {
@@ -81,22 +81,26 @@ export class Spotify extends NSObject {// implements SPTAudioStreamingPlaybackDe
     }
   }
   
-  login() {
-    let url = SPTAuth.defaultInstance().loginURLForClientIdDeclaredRedirectURLScope(Spotify.CLIENT_ID, NSURL.URLWithString(Spotify.REDIRECT_URL), [SPTAuthStreamingScope]);
+  public login() {
+    SPTAuth.defaultInstance().clientID = NSSpotify.CLIENT_ID;
+    SPTAuth.defaultInstance().redirectURL = NSURL.URLWithString(NSSpotify.REDIRECT_URL);
+    SPTAuth.defaultInstance().requestedScopes = [SPTAuthStreamingScope];
+    // let url = SPTAuth.defaultInstance().loginURLForClientIdDeclaredRedirectURLScope(NSSpotify.CLIENT_ID, NSURL.URLWithString(NSSpotify.REDIRECT_URL), [SPTAuthStreamingScope]);
+    let url = SPTAuth.defaultInstance().loginURL;
     
     UIApplication.sharedApplication().openURL(url);
   }
   
-  isLoggedIn() {
+  public isLoggedIn() {
     return this._loggedIn;
   }
   
-  play(track: string) {
+  public play(track: string) {
     if (!this.player) {
-      this.player = SPTAudioStreamingController.alloc().initWithClientId(Spotify.CLIENT_ID);
+      this.player = SPTAudioStreamingController.alloc().initWithClientId(NSSpotify.CLIENT_ID);
       // this.player.playbackDelegate = this;
     }
-    this.player.loginWithSessionCallback(Spotify.SESSION, (error) => {
+    this.player.loginWithSessionCallback(NSSpotify.SESSION, (error) => {
       if (error != null) {
         console.log(`*** Enabling playback, received error: ${error}`);
         return;
@@ -111,18 +115,18 @@ export class Spotify extends NSObject {// implements SPTAudioStreamingPlaybackDe
     });
   }
   
-  playAlbum(album: string) {
+  public playAlbum(album: string) {
     if (!this.player) {
-      this.player = SPTAudioStreamingController.alloc().initWithClientId(Spotify.CLIENT_ID);
+      this.player = SPTAudioStreamingController.alloc().initWithClientId(NSSpotify.CLIENT_ID);
       // this.player.playbackDelegate = this;
     }
-    this.player.loginWithSessionCallback(Spotify.SESSION, (error) => {
+    this.player.loginWithSessionCallback(NSSpotify.SESSION, (error) => {
       if (error != null) {
         console.log(`*** Enabling playback, received error: ${error}`);
         return;
       }
       
-      SPTRequest.requestItemAtURIWithSessionCallback(album, Spotify.SESSION, (error, albumObj) => {
+      SPTRequest.requestItemAtURIWithSessionCallback(album, NSSpotify.SESSION, (error, albumObj) => {
         if (error != null) {
             console.log(`*** Album lookup error: ${error}`);
             return;

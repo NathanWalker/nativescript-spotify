@@ -2,15 +2,19 @@
   "nativescript": {
     "id": "org.nativescript.demo",
     "tns-ios": {
-      "version": "1.5.2"
+      "version": "1.6.0"
     }
+  },
+  "scripts": {
+    "demo": "tns livesync ios --emulator --watch --log trace"
   },
   "dependencies": {
     "nativescript-spotify": "file:..",
-    "tns-core-modules": "latest"
+    "tns-core-modules": "1.6.0"
   },
   "devDependencies": {
-    "nativescript-dev-typescript": "^0.2.3",
+    "nativescript-dev-typescript": "^0.3.0",
+    "shelljs": "^0.6.0",
     "typescript": "^1.7.5"
   }
 }

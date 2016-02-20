@@ -31,5 +31,8 @@
     "url": "https://github.com/NathanWalker/nativescript-spotify/blob/master/LICENSE"
   },
   "homepage": "https://github.com/NathanWalker/nativescript-spotify",
-  "readmeFilename": "README.md"
+  "readmeFilename": "README.md",
+  "devDependencies": {
+    "typescript": "^1.7.5"
+  }
 }

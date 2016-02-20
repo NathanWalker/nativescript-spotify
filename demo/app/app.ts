@@ -1,5 +1,5 @@
 var application = require("application");
-import {Spotify} from 'nativescript-spotify';
+import {NSSpotify} from 'nativescript-spotify';
 
 class MyDelegate extends UIResponder implements UIApplicationDelegate {
   public static ObjCProtocols = [UIApplicationDelegate];
@@ -14,15 +14,15 @@ class MyDelegate extends UIResponder implements UIApplicationDelegate {
     // // an iOS bug, so we wait a bit before doing so.
     // application.performSelectorWithObjectAfterDelay('openURL:', loginURL, 0.1);
     
-    Spotify.CLIENT_ID = '6dbefaf3f1694251890847d9490e15f3';
-    Spotify.REDIRECT_URL = 'pocketrave://spotifylogin';
+    NSSpotify.CLIENT_ID = '6dbefaf3f1694251890847d9490e15f3';
+    NSSpotify.REDIRECT_URL = 'pocketrave://spotifylogin';
 
     return true;
   }
   
   public applicationOpenURLSourceApplicationAnnotation(application, url, sourceApplication, annotation) {
     
-    return Spotify.HANDLE_AUTH_CALLBACK(url);
+    return NSSpotify.HANDLE_AUTH_CALLBACK(url);
 
     // return false;
   }
