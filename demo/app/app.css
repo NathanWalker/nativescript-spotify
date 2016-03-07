@@ -1,9 +1,26 @@
-﻿.Material {
-    font-family: MaterialIcons-Regular, Material Icons;
+﻿button {
+    font-family: 'Roboto', Roboto;
+    color:#A6CE40;
+    margin:10;
+    font-size:20;
 }
 
-button {
-    font-family: 'Roboto', Roboto;
+Image {
+  horizontal-align:center;
+  margin:0;
+}
+
+.login-btn {
+  margin:20 0 20 0;
+  width:75%;
+}
+
+.view-track {
+  color:#fff;
+}
+
+.metadata label {
+  font-size:15;
 }
 
 .align-center {
@@ -11,52 +28,13 @@ button {
     horizontal-align: center;
 }
 
-.title {
-    font-size: 30;
-    margin: 4;
+.footer {
+  background-color:#000;
+  color:#A6CE40;
 }
 
-.subtitle {
-    font-size: 24;
-}
-
-.info {
-    font-size: 20;
-    margin:4;
-}
-
-.size16 {
-    font-size: 16;
-    margin: 2;
-}
-
-.clear-btn {
-    background-color: transparent;
-    padding:5px;
-}
-
-.blue {
-    color: #6A78C5;
-}
-
-.gray {
-    color: #666;
-}
-
-.white {
-    color: #fff;
-}
-
-.avatar-circle {
-    font-size:35;
-    height: 50;
-    width: 50;
-    color: #fff;
-    background-color: #FF4081;
-    border-radius: 25;
-    margin-left: 16;
-    margin-top: 5; 
-    horizontal-align: center;
-    vertical-align: center;
-    text-align: center;
+.track-info {
+  padding:5;
+  horizontal-align: left;
+  color:#A6CE40;
 }

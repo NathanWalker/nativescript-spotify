@@ -1,0 +1,10 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" 
+      showingModally="onShowingModally"
+      shownModally="onShownModally" 
+      loaded="onLoaded" 
+      backgroundColor="#000">
+  <StackLayout backgroundColor="#000">
+    <Label text="test" class="view-track"/>
+    <Button text="Close" tap="{{onModalTap}}" class="view-track"/>
+  </StackLayout>
+</Page>

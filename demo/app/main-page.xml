@@ -1,9 +1,21 @@
 <Page xmlns="http://schemas.nativescript.org/tns.xsd" loaded="pageLoaded">
   <ActionBar title="Spotify Demo" backgroundColor="#000" color="#fff"/>
-  <GridLayout rows="*,auto">
+  <GridLayout rows="*,auto" backgroundColor="#000">
     <StackLayout row="0">
-      <Button text="Spotify Login" tap="{{login}}" />
-      <Button text="Stream Track" tap="{{playTrack}}" />
+      <Image src="~/assets/logo.jpg" /> 
+      <Image src="~/assets/login-btn.png" tap="{{login}}" visibility="{{loggedIn ? 'collapsed' : 'visible'}}" class="login-btn"/> 
+      <Button text="{{playBtnTxt}}" tap="{{togglePlay}}" visibility="{{loggedIn ? 'visible' : 'collapsed'}}"/>
+      <Button text="{{viewTrackInfoBtnTxt}}" tap="{{viewTrackInfo}}" visibility="{{trackLoaded ? 'visible' : 'collapsed'}}" class="view-track"/>
+      <StackLayout row="0" visibility="{{trackInfoOn ? 'visible' : 'collapsed'}}" class="metadata">
+        <Label text="{{trackMetadata.albumName}}" textWrap="true" class="track-info"/>
+        <Label text="{{trackMetadata.albumUri}}" textWrap="true" class="track-info"/>
+        <Label text="{{trackMetadata.artistName}}" textWrap="true" class="track-info"/>
+        <Label text="{{trackMetadata.artistUri}}" textWrap="true" class="track-info"/>
+        <Label text="{{trackMetadata.trackDuration}}" textWrap="true" class="track-info"/>
+        <Label text="{{trackMetadata.trackName}}" textWrap="true" class="track-info"/>
+        <Label text="{{trackMetadata.trackUri}}" textWrap="true" class="track-info"/>
+      </StackLayout>
+      <Button text="View {N} Team Playlist" tap="{{viewPlaylist}}" visibility="{{loggedIn ? 'visible' : 'collapsed'}}" class="view-track"/>
     </StackLayout>
     <StackLayout row="1" class="grey">
       <HtmlView html="{{footerNote}}" class="footer"/>
