@@ -11,6 +11,16 @@ export interface TrackMetadataI {
   trackUri: string;
 }
 
+export class NSSpotifyConstants {
+  public static CLIENT_ID: string;
+  public static NOTIFY_ALBUM_ART: string = `SpotifyAlbumArt`;
+  public static NOTIFY_AUTH_LOGIN_CHANGE: string = `SpotifyLoginChange`;
+  public static NOTIFY_LOGIN_CHECK: string = `SpotifyLoginCheck`;
+  public static NOTIFY_LOGIN_SUCCESS: string = `SpotifyLoginSuccess`;
+  public static NOTIFY_PLAYER_READY: string = `SpotifyPlayerReady`;
+  public static KEY_STORE_SESSION: string = `SpotifySession`;
+}
+
 export class Utils {
   
   public static alert(msg: string): Promise<any> {

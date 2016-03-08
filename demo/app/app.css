@@ -1,6 +1,6 @@
 ﻿button {
     font-family: 'Roboto', Roboto;
-    color:#A6CE40;
+    color:#fff;
     margin:10;
     font-size:20;
 }
@@ -19,8 +19,12 @@ Image {
   color:#fff;
 }
 
+.cover {
+  height:300;
+}
+
 .metadata label {
-  font-size:15;
+  font-size:13;
 }
 
 .align-center {
@@ -34,7 +38,7 @@ Image {
 }
 
 .track-info {
-  padding:5;
+  padding:4 5 4 5;
   horizontal-align: left;
   color:#A6CE40;
 }

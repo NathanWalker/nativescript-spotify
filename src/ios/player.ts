@@ -1,5 +1,6 @@
 import {Observable, EventData} from 'data/observable';
-import {Utils, TrackMetadataI} from '../common';
+import {NSSpotifyConstants, TrackMetadataI, Utils} from '../common';
+import {NSSpotifyAuth} from './auth';
 
 export class SpotifyNotificationObserver extends NSObject {
   private _onReceiveCallback: (notification: NSNotification) => void;
@@ -22,100 +23,36 @@ export class SpotifyNotificationObserver extends NSObject {
   };
 }
 
-declare var SPTAuth: any;
-declare var SPTSession: any;
-
 export class NSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlaybackDelegate {
   public static ObjCProtocols = [SPTAudioStreamingPlaybackDelegate];
-  public static CLIENT_ID: string;
-  public static REDIRECT_URL: string;
-  public static TOKEN_REFRESH_ENDPOINT: string;
-  public static SESSION: SPTSession;
   public player: SPTAudioStreamingController;
   public audioEvents: Observable;
+  private _currentAlbumImageUrl: string;
+  private _currentAlbumUri: string;
   private _loadedTrack: string;
   private _loggedIn: boolean = false;
   private _notificationsSetup: boolean = false;
   private _observers: Array<SpotifyNotificationObserver>;
+
+  // constructor - iOS extending NSObject will get: The TypeScript constructor "NSSpotifyPlayer" will not be executed.  
+  // therefore: initPlayer
   
-  public static HANDLE_AUTH_CALLBACK(url) {
-    // Ask SPTAuth if the URL given is a Spotify authentication callback
-    // if (SPTAuth.defaultInstance().canHandleURLWithDeclaredRedirectURL(url, NSURL.URLWithString(NSSpotifyPlayer.REDIRECT_URL))) { 
-    NSNotificationCenter.defaultCenter().postNotificationNameObject(`SpotifyLoginCheck`, null);
-    if (SPTAuth.defaultInstance().canHandleURL(url)) { 
-      SPTAuth.defaultInstance().handleAuthCallbackWithTriggeredAuthURLCallback(url, (error, session) => {
-        if (error != null) {
-            console.log(`*** Auth error: ${error}`);
-            return;
-        }
-        
-        NSSpotifyPlayer.SAVE_SESSION(session);
-        
-        NSNotificationCenter.defaultCenter().postNotificationNameObject(`SpotifyLoginSuccess`, null);
-        console.log('postNotificationNameObject: SpotifyLoginSuccess');
-             
-        return true;
-      });
-    }
-  }
-  
-  public static SAVE_SESSION(session) {
-    NSSpotifyPlayer.SESSION = session;
-    let userDefaults = NSUserDefaults.standardUserDefaults();
-    let sessionData = NSKeyedArchiver.archivedDataWithRootObject(session);
-    userDefaults.setObjectForKey(sessionData, `SpotifySession`);
-    userDefaults.synchronize();
-  }
-  
-  constructor(emitEvents?: boolean) {
-    super();
+  public initPlayer(emitEvents?: boolean) {
     if (emitEvents) {
       this.setupEvents();
     }
     
-    let userDefaults = NSUserDefaults.standardUserDefaults();
-    let sessionObj = userDefaults.objectForKey(`SpotifySession`);
-    if (sessionObj) {
-      
-      // check if refresh needed
-      let sessionData = sessionObj;//<NSData>
-      let session = NSKeyedUnarchiver.unarchiveObjectWithData(sessionData);//<SPTSession>
-      if (session) {
-        // logged in
-        this._loggedIn = true;
-        
-        if (!session.isValid()) {
-          // renew session
-          // console.log(`SPTAuth.defaultInstance() ----`);  
-          // for (let key in SPTAuth.defaultInstance()) {
-          //   console.log(key);
-          // }
-          // SPTAuth.defaultInstance().renewSessionWithServiceEndpointAtURLCallback(session, NSURL.URLWithString(NSSpotifyPlayer.TOKEN_REFRESH_ENDPOINT), (error, session) => {
-          SPTAuth.defaultInstance().renewSessionCallback(session, (error, session) => {
-            if (error != null) {
-              console.log(`*** Renew session error: ${error}`);
-              return;
-            }
-            
-            NSSpotifyPlayer.SAVE_SESSION(session);
-          });
-        } else {
-          NSSpotifyPlayer.SESSION = session;
-        }
-      } else {
-        this._loggedIn = false;
-      }     
-    } else {
-      this._loggedIn = false;
-    }
+    NSSpotifyAuth.INIT_SESSION().then(() => {
+      this.playerReady();
+      this.setLoggedIn(true);
+    }, () => {
+      this.playerReady();
+      this.setLoggedIn(false);
+    });
   }
   
   public login() {
-    SPTAuth.defaultInstance().clientID = NSSpotifyPlayer.CLIENT_ID;
-    SPTAuth.defaultInstance().redirectURL = NSURL.URLWithString(NSSpotifyPlayer.REDIRECT_URL);
-    SPTAuth.defaultInstance().requestedScopes = [SPTAuthStreamingScope];
-    let url = SPTAuth.defaultInstance().loginURL;
-    UIApplication.sharedApplication().openURL(url);
+    NSSpotifyAuth.LOGIN();
   }
   
   public isLoggedIn() {
@@ -173,40 +110,8 @@ export class NSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayba
       };
       return metadata;
     } else {
-      return undefined;
+      return {};
     }
-  }
-  
-  public playAlbum(album: string) {
-    if (!this.player) {
-      this.player = SPTAudioStreamingController.alloc().initWithClientId(NSSpotifyPlayer.CLIENT_ID);
-      // this.player.playbackDelegate = this;
-    }
-    this.player.loginWithSessionCallback(NSSpotifyPlayer.SESSION, (error) => {
-      if (error != null) {
-        console.log(`*** Enabling playback, received error: ${error}`);
-        return;
-      }
-      
-      SPTRequest.requestItemAtURIWithSessionCallback(album, NSSpotifyPlayer.SESSION, (error, albumObj) => {
-        if (error != null) {
-            console.log(`*** Album lookup error: ${error}`);
-            return;
-        }
-        let album = albumObj;//<SPTAlbum>
-        this.player.playTrackProviderCallback(album, null);
-      });
-      
-    });
-  }
-  
-  // TODO: figure out delegate methods
-  // public audioStreamingDidStartPlayingTrack() {
-  	   //updateCoverArt();   
-  // }
-  
-  public updateCoverArt() {
-    
   }
   
   // Delegate methods
@@ -240,6 +145,7 @@ export class NSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayba
   
   public audioStreamingDidStartPlayingTrack(controller: SPTAudioStreamingController, trackUri: NSURL) {
     console.log(`DidStartPlayingTrack: ${trackUri.absoluteString}`);
+    this.updateCoverArt(this.currentTrackMetadata().albumUri);   
   }
   
   public audioStreamingDidStopPlayingTrack(controller: SPTAudioStreamingController, trackUri: NSURL) {
@@ -267,12 +173,9 @@ export class NSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayba
   }
   
   private play(track: string): Promise<any> {
-    if (!this.player) {
-      this.player = SPTAudioStreamingController.alloc().initWithClientId(NSSpotifyPlayer.CLIENT_ID);
-      this.player.playbackDelegate = this;
-    }
+    this.checkPlayer();
     return new Promise((resolve, reject) => {
-      this.player.loginWithSessionCallback(NSSpotifyPlayer.SESSION, (error) => {
+      this.player.loginWithSessionCallback(NSSpotifyAuth.SESSION, (error) => {
         if (error != null) {
           console.log(`*** Enabling playback, received error: ${error}`);
 
@@ -285,9 +188,6 @@ export class NSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayba
           return;
         }
         
-        // for (let key in this.player) {
-        //   console.log(key);
-        // }
         // method options:
         // playTrackProviderCallback
         // playTrackProviderFromIndexCallback
@@ -295,7 +195,7 @@ export class NSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayba
         // playURIFromIndexCallback
         // playURIsFromIndexCallback
         // playURIsWithOptionsCallback
-        // this.player.playURIsFromIndexCallback([NSURL.URLWithString(track)], 0, (error) => {
+
         this.player.playURICallback(NSURL.URLWithString(track), (error) => {
           if (error != null) {
             console.log(`*** Starting playback got error:`);
@@ -316,6 +216,57 @@ export class NSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayba
     });
   }
   
+  private checkPlayer() {
+    if (!this.player) {
+      this.player = SPTAudioStreamingController.alloc().initWithClientId(NSSpotifyConstants.CLIENT_ID);
+      this.player.playbackDelegate = this;
+    }
+  }
+  
+  private updateCoverArt(albumUri: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      SPTAlbum.albumWithURISessionCallback(NSURL.URLWithString(albumUri), NSSpotifyAuth.SESSION, (error, albumObj: any) => {
+        if (error != null) {
+          console.log(`*** albumWithUri got error:`);
+          console.log(error);
+          reject();
+          return;
+        }
+        
+        console.log(`albumObj: ${albumObj}`);
+        //  artists
+        //   externalIds
+        //   firstTrackPage
+        //   genres
+        //   popularity
+        //   releaseDate
+        //   releaseYear
+        //   playableUri
+        //   tracksForPlayback
+        //   description
+        //   hash
+        //   availableTerritories
+        //   covers
+        //   identifier
+        //   largestCover
+        //   sharingURL
+        //   smallestCover
+        //   type
+        //   name
+        //   uri
+
+        // let cnt = albumObj.covers.count;
+        // for (let i = 0; i < cnt; i++) {
+        //   console.log(albumObj.covers.objectAtIndex(i));
+        // }
+
+        this._currentAlbumImageUrl = albumObj.largestCover.imageURL.absoluteString;
+        NSNotificationCenter.defaultCenter().postNotificationNameObject(NSSpotifyConstants.NOTIFY_ALBUM_ART, this._currentAlbumImageUrl);
+        resolve();
+      });
+    });
+  }
+  
   private isLoginError(desc: string): boolean {
     if (desc.indexOf('invalid credentials') > -1 || desc.indexOf('NULL') > -1) {
       return true;
@@ -325,8 +276,18 @@ export class NSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayba
   }
   
   private loginError() {
-    this._loggedIn = false;
+    this.setLoggedIn(false);
     Utils.alert('You need to login to renew your session.');
+  }
+  
+  private setLoggedIn(value: boolean) {
+    this._loggedIn = value;
+    NSNotificationCenter.defaultCenter().postNotificationNameObject(NSSpotifyConstants.NOTIFY_AUTH_LOGIN_CHANGE, this._loggedIn);
+  }
+  
+  private playerReady(): void {
+    console.log('player.ts: NSSpotifyConstants.NOTIFY_PLAYER_READY');
+    NSNotificationCenter.defaultCenter().postNotificationNameObject(NSSpotifyConstants.NOTIFY_PLAYER_READY, null);
   }
   
   private setupEvents() {
