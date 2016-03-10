@@ -1,6 +1,6 @@
 import {Observable, EventData} from 'data/observable';
-import {NSSpotifyConstants, TrackMetadataI, Utils} from '../common';
-import {NSSpotifyAuth} from './auth';
+import {TNSSpotifyConstants, TNSSpotifyTrackMetadataI, Utils} from '../common';
+import {TNSSpotifyAuth} from './auth';
 
 export class SpotifyNotificationObserver extends NSObject {
   private _onReceiveCallback: (notification: NSNotification) => void;
@@ -23,36 +23,59 @@ export class SpotifyNotificationObserver extends NSObject {
   };
 }
 
-export class NSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlaybackDelegate {
+export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlaybackDelegate {
   public static ObjCProtocols = [SPTAudioStreamingPlaybackDelegate];
   public player: SPTAudioStreamingController;
+
+  // events  
   public audioEvents: Observable;
+  private _observers: Array<SpotifyNotificationObserver>;
+  private _authLoginChange: EventData;
+  private _authLoginCheck: EventData;
+  private _authLoginSuccess: EventData;
+  private _albumArtChange: EventData;
+  private _playerReady: EventData;
+  private _changedPlaybackStatus: EventData;
+  private _seekedToOffset: EventData;
+  private _changedVolume: EventData;
+  private _changedShuffleStatus: EventData;
+  private _changedRepeatStatus: EventData;
+  private _changedToTrack: EventData;
+  private _failedToPlayTrack: EventData;
+  private _startedPlayingTrack: EventData;
+  private _stoppedPlayingTrack: EventData;
+  private _skippedToNextTrack: EventData;
+  private _skippedToPreviousTrack: EventData;
+  private _activePlaybackDevice: EventData;
+  private _inactivePlaybackDevice: EventData;
+  private _poppedQueue: EventData;
+
+  // state  
   private _currentAlbumImageUrl: string;
   private _currentAlbumUri: string;
   private _loadedTrack: string;
   private _loggedIn: boolean = false;
-  private _notificationsSetup: boolean = false;
-  private _observers: Array<SpotifyNotificationObserver>;
+  private _playerLoggedIn: boolean = false;
 
-  // constructor - iOS extending NSObject will get: The TypeScript constructor "NSSpotifyPlayer" will not be executed.  
+  // constructor - iOS extending NSObject will get: The TypeScript constructor "TNSSpotifyPlayer" will not be executed.  
   // therefore: initPlayer
   
   public initPlayer(emitEvents?: boolean) {
+
+    // notifications
+    this.setupNotifications();
+
     if (emitEvents) {
       this.setupEvents();
     }
     
-    NSSpotifyAuth.INIT_SESSION().then(() => {
+    TNSSpotifyAuth.INIT_SESSION().then(() => {
       this.playerReady();
       this.setLoggedIn(true);
     }, () => {
       this.playerReady();
       this.setLoggedIn(false);
     });
-  }
-  
-  public login() {
-    NSSpotifyAuth.LOGIN();
   }
   
   public isLoggedIn() {
@@ -82,7 +105,6 @@ export class NSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayba
         });
       }
     });
-    
   }
   
   public isPlaying(): boolean {
@@ -99,7 +121,7 @@ export class NSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayba
   
   public currentTrackMetadata(): any {
     if (this.player && this.player.currentTrackMetadata) {
-      let metadata: TrackMetadataI = {
+      let metadata: TNSSpotifyTrackMetadataI = {
         albumName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumName'),
         albumUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumURI'),
         artistName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataArtistName'),
@@ -115,117 +137,176 @@ export class NSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayba
   }
   
   // Delegate methods
-  public audioStreamingDidChangePlaybackStatus(controller: SPTAudioStreamingController, status: boolean) {
-    console.log(`DidChangePlaybackStatus: ${status}`);
+  public audioStreamingDidChangePlaybackStatus(controller: SPTAudioStreamingController, playing: boolean) {
+    console.log(`DidChangePlaybackStatus: ${playing}`);
+    if (this.audioEvents) {
+      this._changedPlaybackStatus.data.playing = playing;
+      this.audioEvents.notify(this._changedPlaybackStatus);  
+    }
   }
   
   public audioStreamingDidSeekToOffset(controller: SPTAudioStreamingController, offset: any) {
     console.log(`DidSeekToOffset: ${offset}`);
+    if (this.audioEvents) {
+      this._seekedToOffset.data.offset = offset;
+      this.audioEvents.notify(this._seekedToOffset);  
+    }
   }
   
   public audioStreamingDidChangeVolume(controller: SPTAudioStreamingController, volume: any) {
     console.log(`DidChangeVolume: ${volume}`);
+    if (this.audioEvents) {
+      this._changedVolume.data.volume = volume;
+      this.audioEvents.notify(this._changedVolume);  
+    }
   }
   
   public audioStreamingDidChangeShuffleStatus(controller: SPTAudioStreamingController, isShuffled: boolean) {
     console.log(`DidChangeShuffleStatus: ${isShuffled}`);
+    if (this.audioEvents) {
+      this._changedShuffleStatus.data.shuffle = isShuffled;
+      this.audioEvents.notify(this._changedShuffleStatus);  
+    }
   }
   
   public audioStreamingDidChangeRepeatStatus(controller: SPTAudioStreamingController, isRepeated: boolean) {
     console.log(`DidChangeRepeatStatus: ${isRepeated}`);
+    if (this.audioEvents) {
+      this._changedRepeatStatus.data.repeat = isRepeated;
+      this.audioEvents.notify(this._changedRepeatStatus);  
+    }
   }
   
   public audioStreamingDidChangeToTrack(controller: SPTAudioStreamingController, trackMetadata: NSDictionary) {
     console.log(`DidChangeToTrack: ${trackMetadata}`);
+    if (this.audioEvents) {
+      this._changedToTrack.data.metadata = trackMetadata;
+      this.audioEvents.notify(this._changedToTrack);  
+    }
   }
   
   public audioStreamingDidFailToPlayTrack(controller: SPTAudioStreamingController, trackUri: NSURL) {
     console.log(`DidFailToPlayTrack: ${trackUri.absoluteString}`);
+    if (this.audioEvents) {
+      this._failedToPlayTrack.data.url = trackUri.absoluteString;
+      this.audioEvents.notify(this._failedToPlayTrack);  
+    }
   }
   
   public audioStreamingDidStartPlayingTrack(controller: SPTAudioStreamingController, trackUri: NSURL) {
     console.log(`DidStartPlayingTrack: ${trackUri.absoluteString}`);
-    this.updateCoverArt(this.currentTrackMetadata().albumUri);   
+    this.updateCoverArt(this.currentTrackMetadata().albumUri);
+    if (this.audioEvents) {
+      this._startedPlayingTrack.data.url = trackUri.absoluteString;
+      this.audioEvents.notify(this._startedPlayingTrack);  
+    }
   }
   
   public audioStreamingDidStopPlayingTrack(controller: SPTAudioStreamingController, trackUri: NSURL) {
     console.log(`DidStopPlayingTrack: ${trackUri.absoluteString}`);
+    if (this.audioEvents) {
+      this._stoppedPlayingTrack.data.url = trackUri.absoluteString;
+      this.audioEvents.notify(this._stoppedPlayingTrack);  
+    }
   }
   
   public audioStreamingDidSkipToNextTrack(controller: SPTAudioStreamingController) {
     console.log(`DidSkipToNextTrack`);
+    if (this.audioEvents) {
+      this.audioEvents.notify(this._skippedToNextTrack);  
+    }
   }
   
   public audioStreamingDidSkipToPreviousTrack(controller: SPTAudioStreamingController) {
     console.log(`DidSkipToPreviousTrack`);
+    if (this.audioEvents) {
+      this.audioEvents.notify(this._skippedToPreviousTrack);  
+    }
   }
   
   public audioStreamingDidBecomeActivePlaybackDevice(controller: SPTAudioStreamingController) {
     console.log(`DidBecomeActivePlaybackDevice`);
+    if (this.audioEvents) {
+      this.audioEvents.notify(this._activePlaybackDevice);  
+    }
   }
   
   public audioStreamingDidBecomeInactivePlaybackDevice(controller: SPTAudioStreamingController) {
     console.log(`DidBecomeInactivePlaybackDevice`);
+    if (this.audioEvents) {
+      this.audioEvents.notify(this._inactivePlaybackDevice);  
+    }
   }
   
   public audioStreamingDidPopQueue(controller: SPTAudioStreamingController) {
     console.log(`DidPopQueue`);
+    if (this.audioEvents) {
+      this.audioEvents.notify(this._poppedQueue);  
+    }
   }
   
   private play(track: string): Promise<any> {
     this.checkPlayer();
     return new Promise((resolve, reject) => {
-      this.player.loginWithSessionCallback(NSSpotifyAuth.SESSION, (error) => {
-        if (error != null) {
-          console.log(`*** Enabling playback, received error: ${error}`);
-
-          if (this.isLoginError(error.localizedDescription)) {
-            this.loginError();
-            reject('login');
-          } else {
-            reject(false);
-          }
-          return;
-        }
-        
-        // method options:
-        // playTrackProviderCallback
-        // playTrackProviderFromIndexCallback
-        // playURICallback
-        // playURIFromIndexCallback
-        // playURIsFromIndexCallback
-        // playURIsWithOptionsCallback
-
-        this.player.playURICallback(NSURL.URLWithString(track), (error) => {
+      if (!this._playerLoggedIn) {
+        this.player.loginWithSessionCallback(TNSSpotifyAuth.SESSION, (error) => {
           if (error != null) {
-            console.log(`*** Starting playback got error:`);
-            console.log(error);
-            
+            console.log(`*** Enabling playback, received error: ${error}`);
+
             if (this.isLoginError(error.localizedDescription)) {
               this.loginError();
               reject('login');
             } else {
-              reject(false);  
+              reject(false);
             }
             return;
           }
-          this._loadedTrack = track;
-          resolve(true);
-        });
-      });
+          this._playerLoggedIn = true;
+          this.playUri(track, resolve, reject);
+        });  
+      } else {
+        this.playUri(track, resolve, reject);
+      }
+    });
+  }
+  
+  private playUri(track: string, resolve: Function, reject: Function) {
+    // method options:
+    // playTrackProviderCallback
+    // playTrackProviderFromIndexCallback
+    // playURICallback
+    // playURIFromIndexCallback
+    // playURIsFromIndexCallback
+    // playURIsWithOptionsCallback
+
+    this.player.playURICallback(NSURL.URLWithString(track), (error) => {
+      if (error != null) {
+        console.log(`*** Starting playback got error:`);
+        console.log(error);
+        
+        if (this.isLoginError(error.localizedDescription)) {
+          this.loginError();
+          reject('login');
+        } else {
+          reject(false);  
+        }
+        return;
+      }
+      this._loadedTrack = track;
+      resolve(true);
     });
   }
   
   private checkPlayer() {
     if (!this.player) {
-      this.player = SPTAudioStreamingController.alloc().initWithClientId(NSSpotifyConstants.CLIENT_ID);
+      this.player = SPTAudioStreamingController.alloc().initWithClientId(TNSSpotifyConstants.CLIENT_ID);
       this.player.playbackDelegate = this;
     }
   }
   
   private updateCoverArt(albumUri: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      SPTAlbum.albumWithURISessionCallback(NSURL.URLWithString(albumUri), NSSpotifyAuth.SESSION, (error, albumObj: any) => {
+      SPTAlbum.albumWithURISessionCallback(NSURL.URLWithString(albumUri), TNSSpotifyAuth.SESSION, (error, albumObj: any) => {
         if (error != null) {
           console.log(`*** albumWithUri got error:`);
           console.log(error);
@@ -255,13 +336,11 @@ export class NSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayba
         //   name
         //   uri
 
-        // let cnt = albumObj.covers.count;
-        // for (let i = 0; i < cnt; i++) {
-        //   console.log(albumObj.covers.objectAtIndex(i));
-        // }
-
         this._currentAlbumImageUrl = albumObj.largestCover.imageURL.absoluteString;
-        NSNotificationCenter.defaultCenter().postNotificationNameObject(NSSpotifyConstants.NOTIFY_ALBUM_ART, this._currentAlbumImageUrl);
+        if (this.audioEvents) {
+          this._albumArtChange.data.url = this._currentAlbumImageUrl;
+          this.audioEvents.notify(this._albumArtChange);  
+        }
         resolve();
       });
     });
@@ -282,75 +361,146 @@ export class NSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayba
   
   private setLoggedIn(value: boolean) {
     this._loggedIn = value;
-    NSNotificationCenter.defaultCenter().postNotificationNameObject(NSSpotifyConstants.NOTIFY_AUTH_LOGIN_CHANGE, this._loggedIn);
+    if (!value) {
+      this._playerLoggedIn = false;
+    }
+    if (this.audioEvents) {
+      this._authLoginChange.data.status = this._loggedIn;
+      this.audioEvents.notify(this._authLoginChange);  
+    }
   }
   
   private playerReady(): void {
-    console.log('player.ts: NSSpotifyConstants.NOTIFY_PLAYER_READY');
-    NSNotificationCenter.defaultCenter().postNotificationNameObject(NSSpotifyConstants.NOTIFY_PLAYER_READY, null);
+    console.log('player.ts: TNSSpotifyConstants.NOTIFY_PLAYER_READY');
+    if (this.audioEvents) {
+      this.audioEvents.notify(this._playerReady);  
+    }
   }
   
   private setupEvents() {
     this.audioEvents = new Observable();
-    // this._bufferEvent = {
-    //   eventName: 'audioBuffer',
-    //   data: {
-    //     buffer: 0,
-    //     bufferSize: 0
-    //   }
-    // };
-    // this._positionEvent = {
-    //   eventName: 'position',
-    //   data: {
-    //     position: 0
-    //   }
-    // };
-    // this._reachedEndEvent = {
-    //   eventName: 'reachedEnd'
-    // };
-    // this._changeAudioFileEvent = {
-    //   eventName: 'changeAudioFile'
-    // };
-    // this._changeOutputEvent = {
-    //   eventName: 'changeOutput'
-    // };
-    // this._changePanEvent = {
-    //   eventName: 'changePan'
-    // };
-    // this._changeVolumeEvent = {
-    //   eventName: 'changeVolume'
-    // };
-    // this._changePlayStateEvent = {
-    //   eventName: 'changePlayState'
-    // };
-    // this._seekedEvent = {
-    //   eventName: 'seeked'
-    // };
+    this._authLoginChange = {
+      eventName: 'authLoginChange',
+      data: {
+        status: false
+      }
+    };
+    this._authLoginCheck = {
+      eventName: 'authLoginCheck'
+    };
+    this._authLoginSuccess = {
+      eventName: 'authLoginSuccess'
+    };
+    this._albumArtChange = {
+      eventName: 'albumArtChange',
+      data: {
+        url: ''
+      }
+    };
+    this._playerReady = {
+      eventName: 'playerReady'
+    };
+    // delegate events
+    this._changedPlaybackStatus = {
+      eventName: 'changedPlaybackStatus',
+      data: {
+        playing: false
+      }
+    };
+    this._seekedToOffset = {
+      eventName: 'seekedToOffset',
+      data: {
+        offset: 0
+      }
+    };
+    this._changedVolume = {
+      eventName: 'changedVolume',
+      data: {
+        volume: 0
+      }
+    };
+    this._changedShuffleStatus = {
+      eventName: 'changedShuffleStatus',
+      data: {
+        shuffle: false
+      }
+    };
+    this._changedRepeatStatus = {
+      eventName: 'changedRepeatStatus',
+      data: {
+        repeat: false
+      }
+    };
+    this._changedToTrack = {
+      eventName: 'changedToTrack',
+      data: {
+        metadata: null
+      }
+    };
+    this._failedToPlayTrack = {
+      eventName: 'failedToPlayTrack',
+      data: {
+        url: null
+      }
+    };
+    this._startedPlayingTrack = {
+      eventName: 'startedPlayingTrack',
+      data: {
+        url: null
+      }
+    };
+    this._stoppedPlayingTrack = {
+      eventName: 'stoppedPlayingTrack',
+      data: {
+        url: null
+      }
+    };
+    this._skippedToNextTrack = {
+      eventName: 'skippedToNextTrack'
+    };
+    this._skippedToPreviousTrack = {
+      eventName: 'skippedToPreviousTrack'
+    };
+    this._activePlaybackDevice = {
+      eventName: 'activePlaybackDevice'
+    };
+    this._inactivePlaybackDevice = {
+      eventName: 'inactivePlaybackDevice'
+    };
+    this._poppedQueue = {
+      eventName: 'poppedQueue'
+    };
+  } 
+  
+  private setupNotifications() {
+    this._observers = new Array<SpotifyNotificationObserver>();
+    this.addNotificationObserver(TNSSpotifyConstants.NOTIFY_AUTH_LOGIN_CHANGE, (notification: NSNotification) => {
+      this.setLoggedIn(notification.object);
+    });
+    this.addNotificationObserver(TNSSpotifyConstants.NOTIFY_LOGIN_CHECK, (notification: NSNotification) => {
+      if (this.audioEvents) {
+        this.audioEvents.notify(this._authLoginCheck);  
+      }
+    });
+    this.addNotificationObserver(TNSSpotifyConstants.NOTIFY_LOGIN_SUCCESS, (notification: NSNotification) => {
+      if (this.audioEvents) {
+        this.audioEvents.notify(this._authLoginSuccess);  
+      }
+    });
   }
   
-  // private setupNotifications() {
-  //   this._observers = new Array<SpotifyNotificationObserver>();
-  //   this.addNotificationObserver("EZAudioPlayerDidChangeAudioFileNotification", this.didChangeAudioFile.bind(this));
-  //   this.addNotificationObserver("EZAudioPlayerDidChangeOutputDeviceNotification", this.didChangeOutputDevice.bind(this));
-  //   this.addNotificationObserver("EZAudioPlayerDidChangePanNotification", this.didChangePan.bind(this));
-  //   this.addNotificationObserver("EZAudioPlayerDidChangePlayStateNotification", this.didChangePlayState.bind(this));
-  //   this.addNotificationObserver("EZAudioPlayerDidChangeVolumeNotification", this.didChangeVolume.bind(this));
-  //   this.addNotificationObserver("EZAudioPlayerDidReachEndOfFileNotification", this.didReachEndOfFile.bind(this));
-  //   this.addNotificationObserver("EZAudioPlayerDidSeekNotification", this.didSeek.bind(this));
-  // }
-  
-  // public addNotificationObserver(notificationName: string, onReceiveCallback: (notification: NSNotification) => void): SpotifyNotificationObserver {
-  //   var observer = SpotifyNotificationObserver.new().initWithCallback(onReceiveCallback);
-  //   NSNotificationCenter.defaultCenter().addObserverSelectorNameObject(observer, "onReceive", notificationName, this.player);
-  //   this._observers.push(observer);
-  //   return observer;
-  // }
+  public addNotificationObserver(notificationName: string, onReceiveCallback: (notification: NSNotification) => void): SpotifyNotificationObserver {
+    var observer = SpotifyNotificationObserver.new().initWithCallback(onReceiveCallback);
+    NSNotificationCenter.defaultCenter().addObserverSelectorNameObject(observer, "onReceive", notificationName, null);
+    this._observers.push(observer);
+    return observer;
+  }
 
-  // public removeNotificationObserver(observer: any, notificationName: string) {
-  //   var index = this._observers.indexOf(observer);
-  //   if (index >= 0) {
-  //     this._observers.splice(index, 1);
-  //     NSNotificationCenter.defaultCenter().removeObserverNameObject(observer, notificationName, this.player);
-  //   }
-  // }
+  public removeNotificationObserver(observer: any, notificationName: string) {
+    var index = this._observers.indexOf(observer);
+    if (index >= 0) {
+      this._observers.splice(index, 1);
+      NSNotificationCenter.defaultCenter().removeObserverNameObject(observer, notificationName, this.player);
+    }
+  }
 }

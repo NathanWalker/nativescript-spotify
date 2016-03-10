@@ -1,31 +1,54 @@
 <Page xmlns="http://schemas.nativescript.org/tns.xsd" loaded="pageLoaded">
   <ActionBar title="Spotify Demo" backgroundColor="#000" color="#fff"/>
   <GridLayout rows="*,auto" backgroundColor="#000">
-    <StackLayout row="0">
-      <Image src="{{currentAlbumUrl}}" class="cover" /> 
-      <Image src="~/assets/login-btn.png" tap="{{login}}" visibility="{{loggedIn ? 'collapsed' : 'visible'}}" class="login-btn"/> 
-      <Button text="{{playBtnTxt}}" tap="{{togglePlay}}" visibility="{{loggedIn ? 'visible' : 'collapsed'}}"/>
-      <ScrollView visibility="{{albumName ? 'visible' : 'collapsed'}}">
-        <StackLayout row="0" class="metadata">
-          <Label text="{{artistName}}" textWrap="true" class="track-info"/>
-          <Label text="{{albumName}}" textWrap="true" class="track-info"/>
-          <Label text="{{trackName}}" textWrap="true" class="track-info"/>
-          <Label text="{{trackDuration}}" textWrap="true" class="track-info"/>
-          <Label text="{{albumUri}}" textWrap="true" class="track-info"/>
-          <Label text="{{artistUri}}" textWrap="true" class="track-info"/>
-          <Label text="{{trackUri}}" textWrap="true" class="track-info"/>
+    <AbsoluteLayout row="0" width="100%" height="100%">
+      <GridLayout rows="*,auto" backgroundColor="#000" width="100%" height="100%">
+        <StackLayout row="0">
+          <Image src="{{currentAlbumUrl}}" class="cover" id="album-art" /> 
+          <Image src="~/assets/login-btn.png" tap="{{login}}" visibility="{{loggedIn ? 'collapsed' : 'visible'}}" class="login-btn"/> 
+          <Button text="{{playBtnTxt}}" tap="{{togglePlay}}" visibility="{{loggedIn ? 'visible' : 'collapsed'}}" class="play-btn"/>
+          <GridLayout columns="*,*" rows="auto" visibility="{{loggedIn ? 'visible' : 'collapsed'}}">
+            <Button id="ns-playlist" row="0" col="0" text="Natively Scripting" tap="{{viewPlaylist}}" class="view-track view-playlist" color="{{playlistNSActive}}"/>
+            <Button id="tr-playlist" row="0" col="1" text="Thoughtram Zone" tap="{{viewThoughtram}}" class="view-track view-playlist" color="{{playlistTRActive}}"/>
+          </GridLayout>
+          
+          <ListView id="playlist" items="{{playlistItems}}" itemTap="{{playlistItemTap}}" row="1" separatorColor="#333" backgroundColor="#000" visibility="{{loggedIn ? 'visible' : 'collapsed'}}">
+            <ListView.itemTemplate>
+              <StackLayout backgroundColor="#000">
+                <GridLayout columns="auto, *" rows="auto" class="list-item">
+                  <Button row="0" col="0" text="{{playing ? '&#xf28b;' : '&#xf144;'}}" class="play-btn" />
+                  <Label row="0" col="1" text="{{name}}" textWrap="true" class="title" />
+                </GridLayout>
+              </StackLayout>
+            </ListView.itemTemplate>
+          </ListView>
         </StackLayout>
-      </ScrollView>
-      <Button text="View 'Natively Scripting' Playlist" tap="{{viewPlaylist}}" visibility="{{loggedIn ? 'visible' : 'collapsed'}}" class="view-track"/>
-      <ListView items="{{playlistItems}}" itemTap="{{playlistItemTap}}">
-        <ListView.itemTemplate>
-          <Label text="{{name}}" textWrap="true" class="title" />
-        </ListView.itemTemplate>
-      </ListView>
-    </StackLayout>
-    <StackLayout row="1" class="grey">
-      <HtmlView html="{{footerNote}}" class="footer"/>
-    </StackLayout>    
-  </GridLayout>
+        <StackLayout row="1" class="black" class="footer-area">
+          <HtmlView html="{{footerNote}}" class="footer"/>
+        </StackLayout> 
+      </GridLayout>
+       
+      <StackLayout class="metadata" id="metadata">
+        <Label text="{{artistName}}" textWrap="true" class="track-info"/>
+        <Label text="{{albumName}}" textWrap="true" class="track-info"/>
+        <Label text="{{trackName}}" textWrap="true" class="track-info"/>
+        <Label text="{{trackDuration}}" textWrap="true" class="track-info"/>
+        <Label text="{{albumUri}}" textWrap="true" class="track-info"/>
+        <Label text="{{artistUri}}" textWrap="true" class="track-info"/>
+        <Label text="{{trackUri}}" textWrap="true" class="track-info"/>
+      </StackLayout>
+      
+      <StackLayout class="account-info" id="account-info">
+        <Label text="{{accountName}}" textWrap="true" class="track-info" margin="10" />
+        <Button text="Logout" tap="{{logout}}" textWrap="true" class="track-info"/>
+      </StackLayout>
+      
+      <GridLayout columns="auto,*,auto" rows="auto" class="top-controls" visibility="{{loggedIn ? 'visible' : 'collapsed'}}">
+        <Button col="0" row="0" text="{{metadataBtnTxt}}" class="show-track-btn" tap="{{toggleMetadata}}" />
+        <Label col="1" row="0" text=""/>
+        <Button col="2" row="0" text="{{accountInfoBtnTxt}}" class="show-account-btn" tap="{{toggleAccountInfo}}" />
+      </GridLayout>
 
+    </AbsoluteLayout>     
+  </GridLayout>
 </Page>

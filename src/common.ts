@@ -1,7 +1,7 @@
 import * as app from 'application';
 import * as dialogs from 'ui/dialogs';
 
-export interface TrackMetadataI {
+export interface TNSSpotifyTrackMetadataI {
   albumName: string;
   albumUri: string;
   artistName: string;
@@ -11,9 +11,8 @@ export interface TrackMetadataI {
   trackUri: string;
 }
 
-export class NSSpotifyConstants {
+export class TNSSpotifyConstants {
   public static CLIENT_ID: string;
-  public static NOTIFY_ALBUM_ART: string = `SpotifyAlbumArt`;
   public static NOTIFY_AUTH_LOGIN_CHANGE: string = `SpotifyLoginChange`;
   public static NOTIFY_LOGIN_CHECK: string = `SpotifyLoginCheck`;
   public static NOTIFY_LOGIN_SUCCESS: string = `SpotifyLoginSuccess`;

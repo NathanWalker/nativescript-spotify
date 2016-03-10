@@ -1,10 +1,10 @@
-import {NSSpotifyAuth} from './auth';
+import {TNSSpotifyAuth} from './auth';
 
-export class NSSpotifyRequest {
+export class TNSSpotifyRequest {
   
   public static ITEM(item: string): Promise<any> {
     return new Promise((resolve, reject) => {  
-      SPTRequest.requestItemAtURIWithSessionCallback(NSURL.URLWithString(item), NSSpotifyAuth.SESSION, (error, itemObj) => {
+      SPTRequest.requestItemAtURIWithSessionCallback(NSURL.URLWithString(item), TNSSpotifyAuth.SESSION, (error, itemObj) => {
         if (error != null) {
           console.log(`*** Item lookup error: ${error}`);
           reject();
