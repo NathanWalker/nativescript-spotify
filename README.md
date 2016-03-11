@@ -34,18 +34,18 @@ Add a custom url scheme to handle the authentication callback. Add this to your 
 
 ```
 <key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>org.nativescript.demo</string>  // identifier of your app, the demo here uses this one
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>tnsspotify</string>  // your custom url scheme, the demo here uses this one
-			</array>
-		</dict>
-	</array>
+<array>
+  <dict>
+    <key>CFBundleTypeRole</key>
+    <string>Editor</string>
+    <key>CFBundleURLName</key>
+    <string>org.nativescript.demo</string>  // identifier of your app, the demo here uses this one
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>tnsspotify</string>  // your custom url scheme, the demo here uses this one
+    </array>
+  </dict>
+</array>
 ```
 
 ### Setup
