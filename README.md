@@ -22,6 +22,11 @@ npm install nativescript-spotify --save
 * Create a Spotify Developer account here: https://developer.spotify.com/
 * Create an app in your developer account and follow these instructions to get setup: https://developer.spotify.com/technologies/spotify-ios-sdk/tutorial/#creating-your-client-id-secret-and-callback-uri
 
+### Background
+
+* Based on the [Spotify iOS SDK Beta 13](https://github.com/spotify/ios-sdk/releases)
+* Android coming soon and will be based on [Spotify Android SDK 1.0.0-beta12](https://github.com/spotify/android-sdk/releases)
+
 ## Usage
 
 ### Platform Prerequisites
