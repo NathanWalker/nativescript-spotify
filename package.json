@@ -4,10 +4,9 @@
   "description": "Spotify for your NativeScript app.",
   "main": "spotify.js",
   "nativescript": {
-   "platforms": {
-      "android": "0.0.1",
+    "platforms": {
       "ios": "0.0.1"
-   }
+    }
   },
   "scripts": {
     "build": "tsc",
@@ -21,7 +20,7 @@
     "url": "https://github.com/NathanWalker/nativescript-spotify.git"
   },
   "keywords": [
-    "NativeScript", "Spotify", "Music", "JavaScript", "Android", "iOS"
+    "NativeScript", "Spotify", "Music", "Audio", "JavaScript", "Android", "iOS"
   ],
   "author": {
     "name": "Nathan Walker",

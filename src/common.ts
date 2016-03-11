@@ -2,13 +2,13 @@ import * as app from 'application';
 import * as dialogs from 'ui/dialogs';
 
 export interface TNSSpotifyTrackMetadataI {
-  albumName: string;
-  albumUri: string;
-  artistName: string;
-  artistUri: string;
-  trackDuration: string;
-  trackName: string;
-  trackUri: string;
+  albumName?: string;
+  albumUri?: string;
+  artistName?: string;
+  artistUri?: string;
+  trackDuration?: string;
+  trackName?: string;
+  trackUri?: string;
 }
 
 export class TNSSpotifyConstants {

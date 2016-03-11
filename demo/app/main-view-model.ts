@@ -3,12 +3,21 @@ import {Page} from 'ui/page';
 import {topmost} from 'ui/frame';
 import {AnimationCurve} from 'ui/enums';
 import * as loader from 'nativescript-loading-indicator';
-import {TNSSpotifyConstants, TNSSpotifyAuth, TNSSpotifyPlayer, TNSSpotifyPlaylist, TNSSpotifyRequest, Utils} from 'nativescript-spotify';
+import {
+  TNSSpotifyConstants,
+  TNSSpotifyAuth,
+  TNSSpotifyPlayer,
+  TNSSpotifyPlaylist,
+  TNSSpotifyRequest,
+  TNSSpotifyTrackMetadataI,
+  Utils
+} from 'nativescript-spotify';
 
 export class SpotifyDemo extends Observable {
+
+  // UI  
   public footerNote: string = "<span style='font-family: sans-serif; background-color:#000; color:#fff;'>Demo by <a href='https://github.com/NathanWalker' style='color:#A6CE40;'>Nathan Walker</a></span>";
   public playBtnTxt: string;
-  public spotify: TNSSpotifyPlayer;
   public loggedIn: boolean = false;
   public accountName: string;
   public albumUrl: string;
@@ -28,6 +37,9 @@ export class SpotifyDemo extends Observable {
   public accountInfoBtnTxt: string;
   public playlistNSActive: string;
   public playlistTRActive: string;
+
+  // State  
+  private _spotify: TNSSpotifyPlayer;  
   private _metadataVisible: boolean = false;
   private _chevronDown: string = `\uf13a`;
   private _chevronUp: string = `\uf139`;
@@ -43,8 +55,8 @@ export class SpotifyDemo extends Observable {
     
     // init player
     loader.show();
-    this.spotify = new TNSSpotifyPlayer();
-    this.spotify.initPlayer(true);
+    this._spotify = new TNSSpotifyPlayer();
+    this._spotify.initPlayer(true);
     this.setupEvents();
 
     this.playBtnTxt = `\uf144`;
@@ -78,7 +90,7 @@ export class SpotifyDemo extends Observable {
     // only set current track if there's a track coming in
     if (trackUri) this._currentTrack = trackUri;
 
-    this.spotify.togglePlay(this._currentTrack).then((isPlaying: boolean) => {
+    this._spotify.togglePlay(this._currentTrack).then((isPlaying: boolean) => {
       loader.hide();
       this.set(`trackLoaded`, true);
       this.set(`playing`, isPlaying);
@@ -96,7 +108,7 @@ export class SpotifyDemo extends Observable {
   }
   
   public updateTrackInfo() {
-    let metadata = this.spotify.currentTrackMetadata();
+    let metadata: TNSSpotifyTrackMetadataI = this._spotify.currentTrackMetadata();
     this.set(`albumName`, `Album: ${metadata.albumName}`);
     this.set(`albumUri`, `Album URI: ${metadata.albumUri}`);
     this.set(`artistName`, `Artist: ${metadata.artistName}`);
@@ -251,19 +263,19 @@ export class SpotifyDemo extends Observable {
   }
 
   private setupEvents() {
-    this.spotify.audioEvents.on('albumArtChange', (eventData) => {
+    this._spotify.audioEvents.on('albumArtChange', (eventData) => {
       this.updateAlbumArt(eventData.data.url);
     });
-    this.spotify.audioEvents.on('authLoginChange', (eventData) => {
+    this._spotify.audioEvents.on('authLoginChange', (eventData) => {
       this.updateLogin(eventData.data.status);
     });
-    this.spotify.audioEvents.on('authLoginCheck', (eventData) => {
+    this._spotify.audioEvents.on('authLoginCheck', (eventData) => {
       this.loginCheck();
     });
-    this.spotify.audioEvents.on('authLoginSuccess', (eventData) => {
+    this._spotify.audioEvents.on('authLoginSuccess', (eventData) => {
       this.loginSuccess();
     });
-    this.spotify.audioEvents.on('playerReady', (eventData) => {
+    this._spotify.audioEvents.on('playerReady', (eventData) => {
       this.playerReady();
     });
   }  

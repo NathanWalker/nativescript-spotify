@@ -1,7 +1,10 @@
 import {TNSSpotifyAuth} from './auth';
 
+declare var SPTPlaylistList;
+
 export class TNSSpotifyPlaylist {
-  
+  // TODO: More testing (not documentated ATM)
+
   public static MINE(): Promise<any> {
     return new Promise((resolve, reject) => {
       SPTPlaylistList.playlistsForUserWithSessionCallback(TNSSpotifyAuth.SESSION, (error, playlist) => {

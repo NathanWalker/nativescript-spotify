@@ -1,7 +1,10 @@
 import {TNSSpotifyAuth} from './auth';
 
+declare var SPTRequest, NSURL;
+
 export class TNSSpotifyRequest {
-  
+  //https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTRequest.html
+
   public static ITEM(item: string): Promise<any> {
     return new Promise((resolve, reject) => {  
       SPTRequest.requestItemAtURIWithSessionCallback(NSURL.URLWithString(item), TNSSpotifyAuth.SESSION, (error, itemObj) => {

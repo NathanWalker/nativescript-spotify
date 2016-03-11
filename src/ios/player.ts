@@ -2,6 +2,8 @@ import {Observable, EventData} from 'data/observable';
 import {TNSSpotifyConstants, TNSSpotifyTrackMetadataI, Utils} from '../common';
 import {TNSSpotifyAuth} from './auth';
 
+declare var SPTAudioStreamingPlaybackDelegate, SPTAudioStreamingController, NSObject, NSNotificationCenter, NSNotification, interop;
+
 export class SpotifyNotificationObserver extends NSObject {
   private _onReceiveCallback: (notification: NSNotification) => void;
 
@@ -119,7 +121,8 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     return this._loadedTrack;
   }
   
-  public currentTrackMetadata(): any {
+  public currentTrackMetadata(): TNSSpotifyTrackMetadataI {
+    // https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAudioStreamingController.html#//api/name/currentTrackMetadata
     if (this.player && this.player.currentTrackMetadata) {
       let metadata: TNSSpotifyTrackMetadataI = {
         albumName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumName'),
@@ -271,17 +274,11 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
   }
   
   private playUri(track: string, resolve: Function, reject: Function) {
-    // method options:
-    // playTrackProviderCallback
-    // playTrackProviderFromIndexCallback
-    // playURICallback
-    // playURIFromIndexCallback
-    // playURIsFromIndexCallback
-    // playURIsWithOptionsCallback
+    // https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAudioStreamingController.html
 
     this.player.playURICallback(NSURL.URLWithString(track), (error) => {
       if (error != null) {
-        console.log(`*** Starting playback got error:`);
+        console.log(`*** playURICallback got error:`);
         console.log(error);
         
         if (this.isLoginError(error.localizedDescription)) {
@@ -308,33 +305,13 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     return new Promise((resolve, reject) => {
       SPTAlbum.albumWithURISessionCallback(NSURL.URLWithString(albumUri), TNSSpotifyAuth.SESSION, (error, albumObj: any) => {
         if (error != null) {
-          console.log(`*** albumWithUri got error:`);
+          console.log(`*** albumWithURISessionCallback got error:`);
           console.log(error);
           reject();
           return;
         }
         
-        console.log(`albumObj: ${albumObj}`);
-        //  artists
-        //   externalIds
-        //   firstTrackPage
-        //   genres
-        //   popularity
-        //   releaseDate
-        //   releaseYear
-        //   playableUri
-        //   tracksForPlayback
-        //   description
-        //   hash
-        //   availableTerritories
-        //   covers
-        //   identifier
-        //   largestCover
-        //   sharingURL
-        //   smallestCover
-        //   type
-        //   name
-        //   uri
+        // albumObj: SPTAlbum = https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAlbum.html
 
         this._currentAlbumImageUrl = albumObj.largestCover.imageURL.absoluteString;
         if (this.audioEvents) {
@@ -371,7 +348,6 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
   }
   
   private playerReady(): void {
-    console.log('player.ts: TNSSpotifyConstants.NOTIFY_PLAYER_READY');
     if (this.audioEvents) {
       this.audioEvents.notify(this._playerReady);  
     }

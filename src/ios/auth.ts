@@ -1,7 +1,6 @@
 import {TNSSpotifyConstants} from '../common';
 
-declare var SPTAuth: any;
-declare var SPTSession: any;
+declare var SPTAuth, SPTSession, SPTUser, SPTAuthStreamingScope, SPTAuthUserReadPrivateScope, SPTAuthUserReadEmailScope, SPTAuthUserLibraryModifyScope, SPTAuthUserLibraryReadScope, SPTAuthPlaylistReadPrivateScope, SPTAuthPlaylistModifyPrivateScope, SPTAuthPlaylistModifyPublicScope, UIApplication, NSURL, NSUserDefaults, NSNotificationCenter, NSKeyedArchiver, NSKeyedUnarchiver;
 
 export class TNSSpotifyAuth {
   public static REDIRECT_URL: string;
@@ -76,6 +75,7 @@ export class TNSSpotifyAuth {
   }
   
   public static GET_STORED_SESSION(): any {
+    // https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTSession.html
     let userDefaults = NSUserDefaults.standardUserDefaults();
     return userDefaults.objectForKey(TNSSpotifyConstants.KEY_STORE_SESSION);
   }
@@ -97,6 +97,7 @@ export class TNSSpotifyAuth {
   }
   
   public static CURRENT_USER(): Promise<any> {
+    // https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTUser.html
     return new Promise((resolve, reject) => {
       if (TNSSpotifyAuth.SESSION) {
         SPTUser.requestCurrentUserWithAccessTokenCallback(TNSSpotifyAuth.SESSION.accessToken, (error, user) => {
