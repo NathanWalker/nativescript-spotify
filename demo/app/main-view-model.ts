@@ -2,7 +2,7 @@ import {Observable, EventData} from 'data/observable';
 import {Page} from 'ui/page';
 import {topmost} from 'ui/frame';
 import {AnimationCurve} from 'ui/enums';
-import * as loader from 'nativescript-loading-indicator';
+import {LoadingIndicator} from 'nativescript-loading-indicator';
 import {
   TNSSpotifyConstants,
   TNSSpotifyAuth,
@@ -49,12 +49,14 @@ export class SpotifyDemo extends Observable {
   private _currentTrack: string;
   private _playlistOpen: boolean = false;
   private _playlistItemPlayingIndex: number = -1;
+  private _loader: any;
 
   constructor() {
     super();
-    
+
+    this._loader = new LoadingIndicator();
     // init player
-    loader.show();
+    this._loader.show();
     this._spotify = new TNSSpotifyPlayer();
     this._spotify.initPlayer(true);
     this.setupEvents();
@@ -80,7 +82,7 @@ export class SpotifyDemo extends Observable {
   }
   
   public togglePlay(args?: EventData, trackUri?: string) {
-    loader.show();
+    this._loader.show();
     
     if (!this._currentTrack && !trackUri) {
       // first play if not using playlist right away is a surprise :)
@@ -91,13 +93,13 @@ export class SpotifyDemo extends Observable {
     if (trackUri) this._currentTrack = trackUri;
 
     this._spotify.togglePlay(this._currentTrack).then((isPlaying: boolean) => {
-      loader.hide();
+      this._loader.hide();
       this.set(`trackLoaded`, true);
       this.set(`playing`, isPlaying);
       this.toggleBtn();  
       this.togglePlaylist(false);
     }, (error) => {
-      loader.hide();
+      this._loader.hide();
       this.set(`trackLoaded`, false);
       this.set(`playing`, false);
       this.toggleBtn();  
@@ -120,7 +122,7 @@ export class SpotifyDemo extends Observable {
   
   public viewPlaylist(args: EventData, uri?: string) {
     if (!this._playlistOpen) {
-      loader.show();
+      this._loader.show();
       if (uri) {
         this.set('playlistTRActive', '#A6CE40');
         this.set('playlistNSActive', '#ffffff');
@@ -129,7 +131,7 @@ export class SpotifyDemo extends Observable {
         this.set('playlistNSActive', '#A6CE40');
       }
       TNSSpotifyRequest.ITEM(uri || 'spotify:user:burkeholland:playlist:6kWBeWiaRT7zjINBJJtxJb').then((item) => {
-        loader.hide();
+        this._loader.hide();
         console.log(item); // SPTPlaylistList
         let tracks = TNSSpotifyRequest.TRACKS_FROM_PLAYLIST(item);
         this.set(`playlistItems`, tracks);
@@ -239,18 +241,18 @@ export class SpotifyDemo extends Observable {
   }
   
   private loginCheck() {
-    loader.show();
+    this._loader.show();
   }
   
   private loginSuccess() {
     this.set(`loggedIn`, true);
     console.log(`loginSuccess!`);
-    loader.hide();
+    this._loader.hide();
     this.setUsername();
   }
   
   private playerReady() {
-    loader.hide();
+    this._loader.hide();
   }
   
   private setUsername() {

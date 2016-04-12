@@ -1,11 +1,11 @@
 {
   "name": "nativescript-spotify",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Spotify for your NativeScript app.",
   "main": "spotify.js",
   "nativescript": {
     "platforms": {
-      "ios": "0.0.1"
+      "ios": "1.7.0"
     }
   },
   "scripts": {
@@ -36,6 +36,6 @@
   "homepage": "https://github.com/NathanWalker/nativescript-spotify",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "typescript": "^1.8.7"
+    "typescript": "^1.8.9"
   }
 }
