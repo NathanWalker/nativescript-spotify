@@ -250,6 +250,13 @@ export class SpotifyDemo extends Observable {
     this._loader.hide();
     this.setUsername();
   }
+
+  private loginError(error: any) {
+    this.set(`loggedIn`, false);
+    console.log(`loginError!`);
+    console.log(error);
+    this._loader.hide();
+  }  
   
   private playerReady() {
     this._loader.hide();
@@ -276,6 +283,9 @@ export class SpotifyDemo extends Observable {
     });
     this._spotify.audioEvents.on('authLoginSuccess', (eventData) => {
       this.loginSuccess();
+    });
+    this._spotify.audioEvents.on('authLoginError', (eventData) => {
+      this.loginError(eventData.data);
     });
     this._spotify.audioEvents.on('playerReady', (eventData) => {
       this.playerReady();

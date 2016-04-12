@@ -35,6 +35,7 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
   private _authLoginChange: EventData;
   private _authLoginCheck: EventData;
   private _authLoginSuccess: EventData;
+  private _authLoginError: EventData;
   private _albumArtChange: EventData;
   private _playerReady: EventData;
   private _changedPlaybackStatus: EventData;
@@ -367,6 +368,10 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     this._authLoginSuccess = {
       eventName: 'authLoginSuccess'
     };
+    this._authLoginError = {
+      eventName: 'authLoginError',
+      data: {}
+    };
     this._albumArtChange = {
       eventName: 'albumArtChange',
       data: {
@@ -461,6 +466,12 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     this.addNotificationObserver(TNSSpotifyConstants.NOTIFY_LOGIN_SUCCESS, (notification: NSNotification) => {
       if (this.audioEvents) {
         this.audioEvents.notify(this._authLoginSuccess);  
+      }
+    });
+    this.addNotificationObserver(TNSSpotifyConstants.NOTIFY_LOGIN_ERROR, (notification: NSNotification) => {
+      if (this.audioEvents) {
+        this._authLoginError.data = notification.object;
+        this.audioEvents.notify(this._authLoginError);  
       }
     });
   }

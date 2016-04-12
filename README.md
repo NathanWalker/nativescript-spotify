@@ -33,48 +33,24 @@ npm install nativescript-spotify --save
 
 #### iOS
 
-* Modify `App_Resources/iOS/Info.plist`
-
-Add a custom url scheme to handle the authentication callback. Add this to your `Info.plist`:
-
-```
-<key>CFBundleURLTypes</key>
-<array>
-  <dict>
-    <key>CFBundleTypeRole</key>
-    <string>Editor</string>
-    <key>CFBundleURLName</key>
-    <string>org.nativescript.demo</string>  // identifier of your app, the demo here uses this one
-    <key>CFBundleURLSchemes</key>
-    <array>
-      <string>tnsspotify</string>  // your custom url scheme, the demo here uses this one
-    </array>
-  </dict>
-</array>
-```
-
 ### Setup
 
 * app.ts
 
-Configure application launch phases to setup your Spotify App CLIENT_ID and REDIRECT_URL (the one you created above in the developer account):
+Configure application launch phases to setup your Spotify App CLIENT_ID (the one you created above in the developer account):
 
 ```
 import * as application from 'application';
 import {NSSpotifyConstants, NSSpotifyAuth} from 'nativescript-spotify';
 
-class MyDelegate extends UIResponder implements UIApplicationDelegate {
+class MyDelegate extends UIResponder {
   public static ObjCProtocols = [UIApplicationDelegate];
   
   public applicationDidFinishLaunchingWithOptions(application: UIApplication, launchOptions: NSDictionary): boolean {
     
     NSSpotifyConstants.CLIENT_ID = 'your spotify premium account api key';
-    NSSpotifyAuth.REDIRECT_URL = 'tnsspotify://spotifylogin';  // your custom scheme
+    
     return true;
-  }
-  
-  public applicationOpenURLSourceApplicationAnnotation(application, url, sourceApplication, annotation) { 
-    return NSSpotifyAuth.HANDLE_AUTH_CALLBACK(url);
   }
 }
 application.ios.delegate = MyDelegate;
@@ -232,8 +208,9 @@ Provides `static` methods to help with authentication handling and user manageme
 Method |  Description
 -------- | ---------
 `LOGIN()`: `void` | Initiates login sequence.
+`LOGIN_WITH_SESSION(session)`: `void` | Logs user in with session returned from the in-app browser auth window.
 `LOGOUT()`: `void` | Clear's persisted user session and notifies of login change.
-`HANDLE_AUTH_CALLBACK(url)`: `boolean` | Used in application launch phase to handle the auth redirect back into the app.
+`HANDLE_AUTH_CALLBACK(url)`: `boolean` | When using standard browser redirect auth, this can be used in application launch phase to handle the auth redirect back into the app. On older versions, this may be needed.
 `INIT_SESSION()`: `Promise<any>` | Mainly used internally, but used to restore a session from local persistence and/or renew.
 `SAVE_SESSION(session)`: `void` | Mainly used internally, but can be used to persist a valid Spotify session.
 `GET_STORED_SESSION()`: `any` | Get the current user's session. [Learn more here](https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTSession.html)

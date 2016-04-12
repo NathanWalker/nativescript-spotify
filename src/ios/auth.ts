@@ -2,6 +2,23 @@ import {TNSSpotifyConstants} from '../common';
 
 declare var SPTAuth, SPTSession, SPTUser, SPTAuthStreamingScope, SPTAuthUserReadPrivateScope, SPTAuthUserReadEmailScope, SPTAuthUserLibraryModifyScope, SPTAuthUserLibraryReadScope, SPTAuthPlaylistReadPrivateScope, SPTAuthPlaylistModifyPrivateScope, SPTAuthPlaylistModifyPublicScope, UIApplication, NSURL, NSUserDefaults, NSNotificationCenter, NSKeyedArchiver, NSKeyedUnarchiver;
 
+class TNSSpotifyAuthDelegate extends NSObject {
+  public static ObjCProtocols = [SPTAuthViewDelegate];
+
+  public authenticationViewControllerDidLoginWithSession(ctrl, session) {
+    TNSSpotifyAuth.LOGIN_WITH_SESSION(session);
+  }
+
+  public authenticationViewControllerDidFailToLogin(ctrl, error) {
+    console.log(error);
+    NSNotificationCenter.defaultCenter().postNotificationNameObject(TNSSpotifyConstants.NOTIFY_LOGIN_ERROR, error);
+  }
+
+  public authenticationViewControllerDidCancelLogin(ctrl) {
+    console.log('User canceled login.');
+  }
+}
+
 export class TNSSpotifyAuth {
   public static REDIRECT_URL: string;
   public static TOKEN_REFRESH_ENDPOINT: string;
@@ -11,8 +28,17 @@ export class TNSSpotifyAuth {
     SPTAuth.defaultInstance().clientID = TNSSpotifyConstants.CLIENT_ID;
     SPTAuth.defaultInstance().redirectURL = NSURL.URLWithString(TNSSpotifyAuth.REDIRECT_URL);
     SPTAuth.defaultInstance().requestedScopes = [SPTAuthStreamingScope, SPTAuthUserReadPrivateScope, SPTAuthUserReadEmailScope, SPTAuthUserLibraryModifyScope, SPTAuthUserLibraryReadScope, SPTAuthPlaylistReadPrivateScope, SPTAuthPlaylistModifyPrivateScope, SPTAuthPlaylistModifyPublicScope, 'playlist-read-collaborative']; // no constant for last one: https://github.com/spotify/ios-sdk/issues/423
-    let url = SPTAuth.defaultInstance().loginURL;
-    UIApplication.sharedApplication().openURL(url);
+    
+    // let url = SPTAuth.defaultInstance().loginURL;
+    // UIApplication.sharedApplication().openURL(url);
+    let authvc = SPTAuthViewController.authenticationViewController();
+    authvc.delegate = new TNSSpotifyAuthDelegate();
+    authvc.modalPresentationStyle = UIModalPresentationOverCurrentContext;
+    authvc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+    let rootview = UIApplication.sharedApplication().keyWindow.rootViewController;
+    rootview.modalPresentationStyle = UIModalPresentationCurrentContext;
+    rootview.definesPresentationContext = true;
+    rootview.presentViewControllerAnimatedCompletion(authvc, true, null);
   }
   
   public static LOGOUT() {
@@ -39,6 +65,11 @@ export class TNSSpotifyAuth {
       });
     }
   }
+
+  public static LOGIN_WITH_SESSION(session) {
+    TNSSpotifyAuth.SAVE_SESSION(session);
+    NSNotificationCenter.defaultCenter().postNotificationNameObject(TNSSpotifyConstants.NOTIFY_LOGIN_SUCCESS, null);
+  }  
   
   public static INIT_SESSION(): Promise<any> {
     return new Promise((resolve, reject) => {
