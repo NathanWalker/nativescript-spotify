@@ -3,5 +3,6 @@ docs
 resources
 *.png
 *.jpg
+*.log
 screenshots
 CONTRIBUTING.md
