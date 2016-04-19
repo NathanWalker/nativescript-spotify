@@ -17,11 +17,12 @@ npm run setup  // you will see a lot of TypeScript warnings, this is normal, you
 
 Ok now adjust a couple settings that apply to your Developer account you created above.
 
-You need the Client ID of the app you created in your Spotify Developer account.
+You need the Client ID and Redirect URI of the app you created in your Spotify Developer account.
 Then open `demo/app/app.ts` and set your Client ID here:
 
 ```
 TNSSpotifyConstants.CLIENT_ID = 'your spotify client id here';
+TNSSpotifyAuth.REDIRECT_URL = 'your-app-custom-url-scheme://spotifylogin';
 ```
 
 #### Step 3. Ready and Run.

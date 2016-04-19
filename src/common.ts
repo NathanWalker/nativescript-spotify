@@ -11,6 +11,16 @@ export interface TNSSpotifyTrackMetadataI {
   trackUri?: string;
 }
 
+export interface TNSTrack {
+  id: string;
+  name: string;
+  artist: any;
+  duration: number;
+  playableUri: string;
+  previewUrl: string;
+  album: any;
+}
+
 export class TNSSpotifyConstants {
   public static CLIENT_ID: string;
   public static NOTIFY_AUTH_LOGIN_CHANGE: string = `SpotifyLoginChange`;

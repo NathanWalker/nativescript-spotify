@@ -22,3 +22,8 @@ export * from './src/ios/playlist';
  * Request
  */
 export * from './src/ios/request';
+
+/**
+ * Search
+ */
+export * from './src/ios/search';

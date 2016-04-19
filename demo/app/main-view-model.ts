@@ -203,6 +203,10 @@ export class SpotifyDemo extends Observable {
     this.set(`accountInfoBtnTxt`, this._accountInfoVisible ? this._userIconClose : this._userIcon);
     if (toggleOther) this.toggleMetadata(null, false);
   }
+
+  public viewSearch() {
+    topmost().navigate('search');
+  }
   
   private toggleBtn() {
     this.set(`playBtnTxt`, this.playing ? '\uf28b' : '\uf144');
@@ -272,23 +276,23 @@ export class SpotifyDemo extends Observable {
   }
 
   private setupEvents() {
-    this._spotify.audioEvents.on('albumArtChange', (eventData) => {
+    this._spotify.events.on('albumArtChange', (eventData) => {
       this.updateAlbumArt(eventData.data.url);
     });
-    this._spotify.audioEvents.on('authLoginChange', (eventData) => {
+    this._spotify.events.on('playerReady', (eventData) => {
+      this.playerReady();
+    });
+    this._spotify.auth.events.on('authLoginChange', (eventData) => {
       this.updateLogin(eventData.data.status);
     });
-    this._spotify.audioEvents.on('authLoginCheck', (eventData) => {
+    this._spotify.auth.events.on('authLoginCheck', (eventData) => {
       this.loginCheck();
     });
-    this._spotify.audioEvents.on('authLoginSuccess', (eventData) => {
+    this._spotify.auth.events.on('authLoginSuccess', (eventData) => {
       this.loginSuccess();
     });
-    this._spotify.audioEvents.on('authLoginError', (eventData) => {
+    this._spotify.auth.events.on('authLoginError', (eventData) => {
       this.loginError(eventData.data);
-    });
-    this._spotify.audioEvents.on('playerReady', (eventData) => {
-      this.playerReady();
     });
   }  
 }

@@ -1,5 +1,15 @@
 <Page xmlns="http://schemas.nativescript.org/tns.xsd" loaded="pageLoaded">
-  <ActionBar title="Spotify Demo" backgroundColor="#000" color="#fff"/>
+  <ActionBar title="Spotify Demo" backgroundColor="#000" color="#fff">
+    <ActionBar.actionItems>
+      <ActionItem ios.position="right" tap="{{viewSearch}}">
+        <ActionItem.actionView>
+          <StackLayout>
+            <Label text="&#xf002;" class="action-item"/>
+          </StackLayout>
+        </ActionItem.actionView>
+      </ActionItem>
+    </ActionBar.actionItems>
+  </ActionBar>
   <GridLayout rows="*,auto" backgroundColor="#000">
     <AbsoluteLayout row="0" width="100%" height="100%">
       <GridLayout rows="*,auto" backgroundColor="#000" width="100%" height="100%">

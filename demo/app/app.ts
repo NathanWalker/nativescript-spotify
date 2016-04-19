@@ -1,5 +1,5 @@
 import * as application from 'application';
-import {TNSSpotifyConstants} from 'nativescript-spotify';
+import {TNSSpotifyConstants, TNSSpotifyAuth} from 'nativescript-spotify';
 
 class MyDelegate extends UIResponder {
   public static ObjCProtocols = [UIApplicationDelegate];
@@ -7,7 +7,7 @@ class MyDelegate extends UIResponder {
   public applicationDidFinishLaunchingWithOptions(application: UIApplication, launchOptions: NSDictionary): boolean {
     
     TNSSpotifyConstants.CLIENT_ID = 'your spotify client id here';
-    // TNSSpotifyAuth.REDIRECT_URL = 'tnsspotify://spotifylogin';
+    TNSSpotifyAuth.REDIRECT_URL = 'tnsspotify://spotifylogin';
     return true;
   }
   

@@ -37,7 +37,7 @@ npm install nativescript-spotify --save
 
 * app.ts
 
-Configure application launch phases to setup your Spotify App CLIENT_ID (the one you created above in the developer account):
+Configure application launch phases to setup your Spotify App CLIENT_ID and REDIRECT_URL (the ones you created above in the developer account):
 
 ```
 import * as application from 'application';
@@ -49,7 +49,7 @@ class MyDelegate extends UIResponder {
   public applicationDidFinishLaunchingWithOptions(application: UIApplication, launchOptions: NSDictionary): boolean {
     
     NSSpotifyConstants.CLIENT_ID = 'your spotify premium account api key';
-    
+    TNSSpotifyAuth.REDIRECT_URL = 'your-app-custom-url-scheme://spotifylogin';
     return true;
   }
 }
@@ -216,6 +216,18 @@ Method |  Description
 `GET_STORED_SESSION()`: `any` | Get the current user's session. [Learn more here](https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTSession.html)
 `RENEW_SESSION(session)`: `Promise<any>` | Can be used to pass an expired session to renew it.
 `CURRENT_USER()`: `Promise<any>` | Get the current user object. [Learn more here](https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTUser.html)
+
+### TNSSpotifySearch
+
+TNSSpotifyAuth
+
+Provides 1 `static` method to search Spotify.
+
+#### Methods
+
+Method |  Description
+-------- | ---------
+`QUERY(query: string, queryType: string, offset: number = 0)`: `Promise<any>` | Search and paginate through query results of Spotify search results. Resolves an Object structure: `{page: number (offset), hasNextPage: boolean, totalListLength: number, tracks: Array}`. Right now using `queryType` = `'track'` is supported. More query types coming soon.
 
 ## Why the TNS prefixed name?
 

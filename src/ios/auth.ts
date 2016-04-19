@@ -1,4 +1,6 @@
+import {Observable, EventData} from 'data/observable';
 import {TNSSpotifyConstants} from '../common';
+import {TNSSpotifyNotificationObserver} from './notification';
 
 declare var SPTAuth, SPTSession, SPTUser, SPTAuthStreamingScope, SPTAuthUserReadPrivateScope, SPTAuthUserReadEmailScope, SPTAuthUserLibraryModifyScope, SPTAuthUserLibraryReadScope, SPTAuthPlaylistReadPrivateScope, SPTAuthPlaylistModifyPrivateScope, SPTAuthPlaylistModifyPublicScope, UIApplication, NSURL, NSUserDefaults, NSNotificationCenter, NSKeyedArchiver, NSKeyedUnarchiver;
 
@@ -6,6 +8,7 @@ class TNSSpotifyAuthDelegate extends NSObject {
   public static ObjCProtocols = [SPTAuthViewDelegate];
 
   public authenticationViewControllerDidLoginWithSession(ctrl, session) {
+    console.log(`DidLoginWithSession!`);
     TNSSpotifyAuth.LOGIN_WITH_SESSION(session);
   }
 
@@ -19,10 +22,23 @@ class TNSSpotifyAuthDelegate extends NSObject {
   }
 }
 
-export class TNSSpotifyAuth {
+export class TNSSpotifyAuth extends NSObject {
   public static REDIRECT_URL: string;
   public static TOKEN_REFRESH_ENDPOINT: string;
   public static SESSION: SPTSession;
+
+  // events
+  public events: Observable;
+  private _observers: Array<TNSSpotifyNotificationObserver>;
+  private _authLoginCheck: EventData;
+  private _authLoginSuccess: EventData;
+  private _authLoginError: EventData;
+  private _authLoginChange: EventData;
+
+  // Optionally setup auth events (usually recommended)
+  public setupEvents() {
+    this.setupNotifications();
+  }
   
   public static LOGIN() {
     SPTAuth.defaultInstance().clientID = TNSSpotifyConstants.CLIENT_ID;
@@ -143,6 +159,51 @@ export class TNSSpotifyAuth {
         reject();
       }
     });
-    
+  }
+
+  private setupNotifications() {
+    this._observers = new Array<TNSSpotifyNotificationObserver>();
+    this.events = new Observable();
+    this._authLoginCheck = {
+      eventName: 'authLoginCheck',
+      object: this.events
+    };
+    this._authLoginSuccess = {
+      eventName: 'authLoginSuccess',
+      object: this.events
+    };
+    this._authLoginError = {
+      eventName: 'authLoginError',
+      object: this.events,
+      data: {}
+    };
+    this._authLoginChange = {
+      eventName: 'authLoginChange',
+      object: this.events,
+      data: {
+        status: false
+      }
+    };
+    this.addNotificationObserver(TNSSpotifyConstants.NOTIFY_LOGIN_CHECK, (notification: NSNotification) => {
+      this.events.notify(this._authLoginCheck);  
+    });
+    this.addNotificationObserver(TNSSpotifyConstants.NOTIFY_LOGIN_SUCCESS, (notification: NSNotification) => {
+      this.events.notify(this._authLoginSuccess);  
+    });
+    this.addNotificationObserver(TNSSpotifyConstants.NOTIFY_LOGIN_ERROR, (notification: NSNotification) => {
+      this._authLoginError.data = notification.object;
+      this.events.notify(this._authLoginError);  
+    });
+    this.addNotificationObserver(TNSSpotifyConstants.NOTIFY_AUTH_LOGIN_CHANGE, (notification: NSNotification) => {
+      this._authLoginChange.data.status = notification.object;
+      this.events.notify(this._authLoginChange);  
+    });
+  }
+
+  private addNotificationObserver(notificationName: string, onReceiveCallback: (notification: NSNotification) => void): TNSSpotifyNotificationObserver {
+    var observer = TNSSpotifyNotificationObserver.new().initWithCallback(onReceiveCallback);
+    NSNotificationCenter.defaultCenter().addObserverSelectorNameObject(observer, "onReceive", notificationName, null);
+    this._observers.push(observer);
+    return observer;
   }
 }

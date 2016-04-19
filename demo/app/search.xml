@@ -1,0 +1,28 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" loaded="pageLoaded">
+  <ActionBar title="Search" backgroundColor="#000" color="#fff"/>
+  <GridLayout rows="*,auto" backgroundColor="#000">
+    <AbsoluteLayout row="0" width="100%" height="100%">
+      <GridLayout rows="*,auto" backgroundColor="#000" width="100%" height="100%">
+        <StackLayout row="0">
+          <Image src="~/assets/login-btn.png" tap="{{login}}" visibility="{{loggedIn ? 'collapsed' : 'visible'}}" class="login-btn"/> 
+          <SearchBar submit="{{search}}" visibility="{{loggedIn ? 'visible' : 'collapsed'}}"></SearchBar>
+          
+          <ListView items="{{searchResults}}" itemTap="{{resultTap}}" row="1" separatorColor="#333" backgroundColor="#000" visibility="{{loggedIn ? 'visible' : 'collapsed'}}">
+            <ListView.itemTemplate>
+              <StackLayout backgroundColor="#000">
+                <GridLayout columns="auto, *" rows="auto" class="list-item">
+                  <Button row="0" col="0" text="{{playing ? '&#xf28b;' : '&#xf144;'}}" class="play-btn" />
+                  <Label row="0" col="1" text="{{name}}" textWrap="true" class="title" />
+                </GridLayout>
+              </StackLayout>
+            </ListView.itemTemplate>
+          </ListView>
+        </StackLayout>
+        <StackLayout row="1" class="black" class="footer-area">
+          <HtmlView html="{{footerNote}}" class="footer"/>
+        </StackLayout> 
+      </GridLayout>
+
+    </AbsoluteLayout>     
+  </GridLayout>
+</Page>

@@ -4,38 +4,13 @@ import {TNSSpotifyAuth} from './auth';
 
 declare var SPTAudioStreamingPlaybackDelegate, SPTAudioStreamingController, NSObject, NSNotificationCenter, NSNotification, interop;
 
-export class SpotifyNotificationObserver extends NSObject {
-  private _onReceiveCallback: (notification: NSNotification) => void;
-
-  static new(): SpotifyNotificationObserver {
-    return <SpotifyNotificationObserver>super.new();
-  }
-
-  public initWithCallback(onReceiveCallback: (notification: NSNotification) => void): SpotifyNotificationObserver {
-    this._onReceiveCallback = onReceiveCallback;
-    return this;
-  }
-
-  public onReceive(notification: NSNotification): void {
-    this._onReceiveCallback(notification);
-  }
-
-  public static ObjCExposedMethods = {
-    "onReceive": { returns: interop.types.void, params: [NSNotification] }
-  };
-}
-
 export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlaybackDelegate {
   public static ObjCProtocols = [SPTAudioStreamingPlaybackDelegate];
   public player: SPTAudioStreamingController;
+  public auth: TNSSpotifyAuth;
 
   // events  
-  public audioEvents: Observable;
-  private _observers: Array<SpotifyNotificationObserver>;
-  private _authLoginChange: EventData;
-  private _authLoginCheck: EventData;
-  private _authLoginSuccess: EventData;
-  private _authLoginError: EventData;
+  public events: Observable;
   private _albumArtChange: EventData;
   private _playerReady: EventData;
   private _changedPlaybackStatus: EventData;
@@ -60,24 +35,26 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
   private _loggedIn: boolean = false;
   private _playerLoggedIn: boolean = false;
 
-  // constructor - iOS extending NSObject will get: The TypeScript constructor "TNSSpotifyPlayer" will not be executed.  
-  // therefore: initPlayer
+  // constructor - iOS extending NSObject: The TypeScript constructor "TNSSpotifyPlayer" will not be executed.  
+  // therefore: initPlayer must be used
   
   public initPlayer(emitEvents?: boolean) {
 
-    // notifications
-    this.setupNotifications();
+    // setup auth
+    this.auth = new TNSSpotifyAuth();
 
     if (emitEvents) {
+      this.auth.setupEvents();
       this.setupEvents();
     }
-    
+
+    // init auth session
     TNSSpotifyAuth.INIT_SESSION().then(() => {
-      this.playerReady();
       this.setLoggedIn(true);
-    }, () => {
       this.playerReady();
+    }, () => {
       this.setLoggedIn(false);
+      this.playerReady();
     });
   }
   
@@ -143,109 +120,109 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
   // Delegate methods
   public audioStreamingDidChangePlaybackStatus(controller: SPTAudioStreamingController, playing: boolean) {
     console.log(`DidChangePlaybackStatus: ${playing}`);
-    if (this.audioEvents) {
+    if (this.events) {
       this._changedPlaybackStatus.data.playing = playing;
-      this.audioEvents.notify(this._changedPlaybackStatus);  
+      this.events.notify(this._changedPlaybackStatus);  
     }
   }
   
   public audioStreamingDidSeekToOffset(controller: SPTAudioStreamingController, offset: any) {
     console.log(`DidSeekToOffset: ${offset}`);
-    if (this.audioEvents) {
+    if (this.events) {
       this._seekedToOffset.data.offset = offset;
-      this.audioEvents.notify(this._seekedToOffset);  
+      this.events.notify(this._seekedToOffset);  
     }
   }
   
   public audioStreamingDidChangeVolume(controller: SPTAudioStreamingController, volume: any) {
     console.log(`DidChangeVolume: ${volume}`);
-    if (this.audioEvents) {
+    if (this.events) {
       this._changedVolume.data.volume = volume;
-      this.audioEvents.notify(this._changedVolume);  
+      this.events.notify(this._changedVolume);  
     }
   }
   
   public audioStreamingDidChangeShuffleStatus(controller: SPTAudioStreamingController, isShuffled: boolean) {
     console.log(`DidChangeShuffleStatus: ${isShuffled}`);
-    if (this.audioEvents) {
+    if (this.events) {
       this._changedShuffleStatus.data.shuffle = isShuffled;
-      this.audioEvents.notify(this._changedShuffleStatus);  
+      this.events.notify(this._changedShuffleStatus);  
     }
   }
   
   public audioStreamingDidChangeRepeatStatus(controller: SPTAudioStreamingController, isRepeated: boolean) {
     console.log(`DidChangeRepeatStatus: ${isRepeated}`);
-    if (this.audioEvents) {
+    if (this.events) {
       this._changedRepeatStatus.data.repeat = isRepeated;
-      this.audioEvents.notify(this._changedRepeatStatus);  
+      this.events.notify(this._changedRepeatStatus);  
     }
   }
   
   public audioStreamingDidChangeToTrack(controller: SPTAudioStreamingController, trackMetadata: NSDictionary) {
     console.log(`DidChangeToTrack: ${trackMetadata}`);
-    if (this.audioEvents) {
+    if (this.events) {
       this._changedToTrack.data.metadata = trackMetadata;
-      this.audioEvents.notify(this._changedToTrack);  
+      this.events.notify(this._changedToTrack);  
     }
   }
   
   public audioStreamingDidFailToPlayTrack(controller: SPTAudioStreamingController, trackUri: NSURL) {
     console.log(`DidFailToPlayTrack: ${trackUri.absoluteString}`);
-    if (this.audioEvents) {
+    if (this.events) {
       this._failedToPlayTrack.data.url = trackUri.absoluteString;
-      this.audioEvents.notify(this._failedToPlayTrack);  
+      this.events.notify(this._failedToPlayTrack);  
     }
   }
   
   public audioStreamingDidStartPlayingTrack(controller: SPTAudioStreamingController, trackUri: NSURL) {
     console.log(`DidStartPlayingTrack: ${trackUri.absoluteString}`);
     this.updateCoverArt(this.currentTrackMetadata().albumUri);
-    if (this.audioEvents) {
+    if (this.events) {
       this._startedPlayingTrack.data.url = trackUri.absoluteString;
-      this.audioEvents.notify(this._startedPlayingTrack);  
+      this.events.notify(this._startedPlayingTrack);  
     }
   }
   
   public audioStreamingDidStopPlayingTrack(controller: SPTAudioStreamingController, trackUri: NSURL) {
     console.log(`DidStopPlayingTrack: ${trackUri.absoluteString}`);
-    if (this.audioEvents) {
+    if (this.events) {
       this._stoppedPlayingTrack.data.url = trackUri.absoluteString;
-      this.audioEvents.notify(this._stoppedPlayingTrack);  
+      this.events.notify(this._stoppedPlayingTrack);  
     }
   }
   
   public audioStreamingDidSkipToNextTrack(controller: SPTAudioStreamingController) {
     console.log(`DidSkipToNextTrack`);
-    if (this.audioEvents) {
-      this.audioEvents.notify(this._skippedToNextTrack);  
+    if (this.events) {
+      this.events.notify(this._skippedToNextTrack);  
     }
   }
   
   public audioStreamingDidSkipToPreviousTrack(controller: SPTAudioStreamingController) {
     console.log(`DidSkipToPreviousTrack`);
-    if (this.audioEvents) {
-      this.audioEvents.notify(this._skippedToPreviousTrack);  
+    if (this.events) {
+      this.events.notify(this._skippedToPreviousTrack);  
     }
   }
   
   public audioStreamingDidBecomeActivePlaybackDevice(controller: SPTAudioStreamingController) {
     console.log(`DidBecomeActivePlaybackDevice`);
-    if (this.audioEvents) {
-      this.audioEvents.notify(this._activePlaybackDevice);  
+    if (this.events) {
+      this.events.notify(this._activePlaybackDevice);  
     }
   }
   
   public audioStreamingDidBecomeInactivePlaybackDevice(controller: SPTAudioStreamingController) {
     console.log(`DidBecomeInactivePlaybackDevice`);
-    if (this.audioEvents) {
-      this.audioEvents.notify(this._inactivePlaybackDevice);  
+    if (this.events) {
+      this.events.notify(this._inactivePlaybackDevice);  
     }
   }
   
   public audioStreamingDidPopQueue(controller: SPTAudioStreamingController) {
     console.log(`DidPopQueue`);
-    if (this.audioEvents) {
-      this.audioEvents.notify(this._poppedQueue);  
+    if (this.events) {
+      this.events.notify(this._poppedQueue);  
     }
   }
   
@@ -315,9 +292,9 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
         // albumObj: SPTAlbum = https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAlbum.html
 
         this._currentAlbumImageUrl = albumObj.largestCover.imageURL.absoluteString;
-        if (this.audioEvents) {
+        if (this.events) {
           this._albumArtChange.data.url = this._currentAlbumImageUrl;
-          this.audioEvents.notify(this._albumArtChange);  
+          this.events.notify(this._albumArtChange);  
         }
         resolve();
       });
@@ -342,36 +319,23 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     if (!value) {
       this._playerLoggedIn = false;
     }
-    if (this.audioEvents) {
-      this._authLoginChange.data.status = this._loggedIn;
-      this.audioEvents.notify(this._authLoginChange);  
-    }
   }
   
   private playerReady(): void {
-    if (this.audioEvents) {
-      this.audioEvents.notify(this._playerReady);  
+    if (this.events) {
+      this._playerReady.data.loggedIn = this._loggedIn;
+      this.events.notify(this._playerReady);  
     }
   }
   
   private setupEvents() {
-    this.audioEvents = new Observable();
-    this._authLoginChange = {
-      eventName: 'authLoginChange',
-      data: {
-        status: false
-      }
-    };
-    this._authLoginCheck = {
-      eventName: 'authLoginCheck'
-    };
-    this._authLoginSuccess = {
-      eventName: 'authLoginSuccess'
-    };
-    this._authLoginError = {
-      eventName: 'authLoginError',
-      data: {}
-    };
+    // auth state
+    this.auth.events.on('authLoginChange', (eventData: any) => {
+      this.setLoggedIn(eventData.data.status);
+    });      
+
+    // player events    
+    this.events = new Observable();
     this._albumArtChange = {
       eventName: 'albumArtChange',
       data: {
@@ -379,7 +343,10 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
       }
     };
     this._playerReady = {
-      eventName: 'playerReady'
+      eventName: 'playerReady',
+      data: {
+        loggedIn: false
+      }
     };
     // delegate events
     this._changedPlaybackStatus = {
@@ -452,42 +419,4 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
       eventName: 'poppedQueue'
     };
   } 
-  
-  private setupNotifications() {
-    this._observers = new Array<SpotifyNotificationObserver>();
-    this.addNotificationObserver(TNSSpotifyConstants.NOTIFY_AUTH_LOGIN_CHANGE, (notification: NSNotification) => {
-      this.setLoggedIn(notification.object);
-    });
-    this.addNotificationObserver(TNSSpotifyConstants.NOTIFY_LOGIN_CHECK, (notification: NSNotification) => {
-      if (this.audioEvents) {
-        this.audioEvents.notify(this._authLoginCheck);  
-      }
-    });
-    this.addNotificationObserver(TNSSpotifyConstants.NOTIFY_LOGIN_SUCCESS, (notification: NSNotification) => {
-      if (this.audioEvents) {
-        this.audioEvents.notify(this._authLoginSuccess);  
-      }
-    });
-    this.addNotificationObserver(TNSSpotifyConstants.NOTIFY_LOGIN_ERROR, (notification: NSNotification) => {
-      if (this.audioEvents) {
-        this._authLoginError.data = notification.object;
-        this.audioEvents.notify(this._authLoginError);  
-      }
-    });
-  }
-  
-  public addNotificationObserver(notificationName: string, onReceiveCallback: (notification: NSNotification) => void): SpotifyNotificationObserver {
-    var observer = SpotifyNotificationObserver.new().initWithCallback(onReceiveCallback);
-    NSNotificationCenter.defaultCenter().addObserverSelectorNameObject(observer, "onReceive", notificationName, null);
-    this._observers.push(observer);
-    return observer;
-  }
-
-  public removeNotificationObserver(observer: any, notificationName: string) {
-    var index = this._observers.indexOf(observer);
-    if (index >= 0) {
-      this._observers.splice(index, 1);
-      NSNotificationCenter.defaultCenter().removeObserverNameObject(observer, notificationName, this.player);
-    }
-  }
 }

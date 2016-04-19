@@ -10,6 +10,12 @@ Image {
   margin:0;
 }
 
+.action-item {
+  font-family: FontAwesome;
+  font-size: 30;
+  color:#fff;
+}
+
 .login-btn {
   margin:20 0 20 0;
   width:75%;
