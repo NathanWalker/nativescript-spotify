@@ -6,3 +6,5 @@ resources
 *.log
 screenshots
 CONTRIBUTING.md
+*.ts
+!*.d.ts

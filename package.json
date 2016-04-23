@@ -1,6 +1,6 @@
 {
   "name": "nativescript-spotify",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Spotify for your NativeScript app.",
   "main": "spotify.js",
   "nativescript": {
