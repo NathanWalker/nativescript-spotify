@@ -6,24 +6,24 @@ export * from './src/common';
 /**
  * Auth
  */
-export * from './src/ios/auth';
+export * from './src/android/auth';
 
 /**
  * Player
  */
-export * from './src/ios/player';
+export * from './src/android/player';
 
 /**
  * Playlist
  */
-export * from './src/ios/playlist';
+export * from './src/android/playlist';
 
 /**
  * Request
  */
-export * from './src/ios/request';
+export * from './src/android/request';
 
 /**
  * Search
  */
-export * from './src/ios/search';
+export * from './src/android/search';

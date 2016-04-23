@@ -1,7 +1,7 @@
 import {EventData, Observable} from 'data/observable';
-import {TNSSpotifyNotificationObserver} from './notification';
-const sdk = (<any>com).spotify.sdk.android.authentication;
-import app = require("application");
+const sdk = com.spotify.sdk.android.authentication;
+import * as app from 'application';
+
 const TOKEN = sdk.AuthenticationResponse.Type.TOKEN,
     CODE = sdk.AuthenticationResponse.Type.CODE,
     EMPTY = sdk.AuthenticationResponse.Type.EMPTY,
@@ -15,7 +15,6 @@ export class TNSSpotifyAuth {
     private static REQUEST_CODE;
     // events
     public events: Observable;
-    private _observers: Array<TNSSpotifyNotificationObserver>;
     private _authLoginCheck: EventData;
     private _authLoginSuccess: EventData;
     private _authLoginError: EventData;
