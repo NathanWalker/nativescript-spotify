@@ -1,0 +1,2 @@
+// NativeScript Spotify build related flags
+OTHER_LDFLAGS = $(inherited) -Wl,-exported_symbol,_SPTAuthStreamingScope -Wl,-exported_symbol,_SPTAuthUserReadPrivateScope -Wl,-exported_symbol,_SPTAuthUserReadEmailScope -Wl,-exported_symbol,_SPTAuthUserLibraryModifyScope -Wl,-exported_symbol,_SPTAuthUserLibraryReadScope -Wl,-exported_symbol,_SPTAuthPlaylistReadPrivateScope -Wl,-exported_symbol,_SPTAuthPlaylistModifyPrivateScope -Wl,-exported_symbol,_SPTAuthPlaylistModifyPublicScope
