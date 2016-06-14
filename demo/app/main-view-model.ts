@@ -146,7 +146,7 @@ export class SpotifyDemo extends Observable {
     this.viewPlaylist(args, 'spotify:user:pascalprecht:playlist:6tTtJJTxkrp9Qnz5afZzpz');
   }
 
-  public playlistItemTap(args: EventData) {
+  public playlistItemTap(args: any) {
     if (this._playlistItemPlayingIndex === args.index) {
       // pause track
       this.playlistItems[this._playlistItemPlayingIndex].playing = false;
@@ -206,6 +206,14 @@ export class SpotifyDemo extends Observable {
 
   public viewSearch() {
     topmost().navigate('search');
+  }
+
+  private playNextTrack() {
+    if (this._playlistItemPlayingIndex + 1 < this.playlistItems.length) {
+      this.playlistItemTap({ index: this._playlistItemPlayingIndex + 1 });
+    } else {
+      this.playlistItemTap({ index: 0 });
+    }
   }
   
   private toggleBtn() {
@@ -281,6 +289,9 @@ export class SpotifyDemo extends Observable {
     });
     this._spotify.events.on('playerReady', (eventData) => {
       this.playerReady();
+    });
+    this._spotify.events.on('changedPlaybackStatus', (eventData) => {
+      this.playNextTrack();
     });
     this._spotify.auth.events.on('authLoginChange', (eventData) => {
       this.updateLogin(eventData.data.status);

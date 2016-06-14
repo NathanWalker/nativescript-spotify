@@ -26,6 +26,7 @@ export class TNSSpotifyAuth extends NSObject {
   public static REDIRECT_URL: string;
   public static TOKEN_REFRESH_ENDPOINT: string;
   public static SESSION: SPTSession;
+  public static AUTH_VIEW_SHOWING: boolean;
 
   // events
   public events: Observable;
@@ -55,6 +56,7 @@ export class TNSSpotifyAuth extends NSObject {
     rootview.modalPresentationStyle = UIModalPresentationCurrentContext;
     rootview.definesPresentationContext = true;
     rootview.presentViewControllerAnimatedCompletion(authvc, true, null);
+    TNSSpotifyAuth.AUTH_VIEW_SHOWING = true;
   }
   
   public static LOGOUT() {
@@ -74,7 +76,13 @@ export class TNSSpotifyAuth extends NSObject {
             console.log(`*** Auth error: ${error}`);
             return;
         }
-        
+
+        if (TNSSpotifyAuth.AUTH_VIEW_SHOWING) {
+          // dismiss modal
+          let rootview = UIApplication.sharedApplication().keyWindow.rootViewController;
+          rootview.dismissViewControllerAnimatedCompletion(true, null);
+          TNSSpotifyAuth.AUTH_VIEW_SHOWING = false;
+        }
         TNSSpotifyAuth.SAVE_SESSION(session);
         NSNotificationCenter.defaultCenter().postNotificationNameObject(TNSSpotifyConstants.NOTIFY_LOGIN_SUCCESS, null);
         return true;

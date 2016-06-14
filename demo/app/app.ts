@@ -11,9 +11,9 @@ class MyDelegate extends UIResponder {
     return true;
   }
   
-  // public applicationOpenURLSourceApplicationAnnotation(application, url, sourceApplication, annotation) { 
-  //   return TNSSpotifyAuth.HANDLE_AUTH_CALLBACK(url);
-  // }
+  public applicationOpenURLSourceApplicationAnnotation(application, url, sourceApplication, annotation) { 
+    return TNSSpotifyAuth.HANDLE_AUTH_CALLBACK(url);
+  }
 }
 application.ios.delegate = MyDelegate;
 application.mainModule = "main-page";

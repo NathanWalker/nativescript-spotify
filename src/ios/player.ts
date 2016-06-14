@@ -62,14 +62,15 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     return this._loggedIn;
   }
   
-  public togglePlay(track?: string): Promise<any> {
+  public togglePlay(track?: string, force?: boolean): Promise<any> {
     return new Promise((resolve, reject) => {
       if (track && (track !== this._loadedTrack)) {
         // first time play or changing track
         this.play(track).then(resolve, reject);
       } else if (this.player) {
         // toggling
-        this.player.setIsPlayingCallback(!this.player.isPlaying, (error) => {
+        let playState = typeof force !== 'undefined' ? force : !this.player.isPlaying;
+        this.player.setIsPlayingCallback(playState, (error) => {
           if (error != null) {
             console.log(`*** Pause/Resume playback got error:`);
             console.log(error);

@@ -41,7 +41,7 @@ export class TNSSpotifySearch {
     });
   }
   
-  public static TRACKS_FROM_RESULTS(results: any): Array<any> {
+  public static TRACKS_FROM_RESULTS(results: any): Array<TNSTrack> {
     let itemNSArray = results.items;
     let cnt = itemNSArray.count;
     let items = [];

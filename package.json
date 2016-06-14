@@ -1,15 +1,16 @@
 {
   "name": "nativescript-spotify",
-  "version": "1.2.1",
+  "version": "1.2.3",
   "description": "Spotify for your NativeScript app.",
   "main": "spotify.js",
   "nativescript": {
     "platforms": {
-      "ios": "1.7.0"
+      "ios": "2.0.0"
     }
   },
   "scripts": {
     "build": "tsc",
+    "clean": "rm -rf demo/node_modules demo/lib demo/platforms",
     "demo.ios": "npm run preparedemo; cd demo; tns emulate ios",
 		"demo.android": "npm run preparedemo; cd demo; tns run android",
 		"preparedemo": "npm run build; cd demo; tns plugin remove nativescript-spotify; tns plugin add ..; tns install",
@@ -36,6 +37,6 @@
   "homepage": "https://github.com/NathanWalker/nativescript-spotify",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "typescript": "^1.8.9"
+    "typescript": "^1.8.10"
   }
 }
