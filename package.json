@@ -1,27 +1,34 @@
 {
   "name": "nativescript-spotify",
-  "version": "1.2.3",
+  "version": "1.2.6",
   "description": "Spotify for your NativeScript app.",
   "main": "spotify.js",
+  "typings": "spotify.d.ts",
   "nativescript": {
     "platforms": {
-      "ios": "2.0.0"
+      "ios": "2.1.1"
     }
   },
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf demo/node_modules demo/lib demo/platforms",
     "demo.ios": "npm run preparedemo; cd demo; tns emulate ios",
-		"demo.android": "npm run preparedemo; cd demo; tns run android",
-		"preparedemo": "npm run build; cd demo; tns plugin remove nativescript-spotify; tns plugin add ..; tns install",
-		"setup": "cd demo; npm install; cd ..; npm run build; cd demo; tns plugin add ..; cd .."
+    "demo.android": "npm run preparedemo; cd demo; tns run android",
+    "preparedemo": "npm run build; cd demo; tns plugin remove nativescript-spotify; tns plugin add ..; tns install",
+    "setup": "cd demo; npm install; cd ..; npm run build; cd demo; tns plugin add ..; cd .."
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/NathanWalker/nativescript-spotify.git"
   },
   "keywords": [
-    "NativeScript", "Spotify", "Music", "Audio", "JavaScript", "Android", "iOS"
+    "NativeScript",
+    "Spotify",
+    "Music",
+    "Audio",
+    "JavaScript",
+    "Android",
+    "iOS"
   ],
   "author": {
     "name": "Nathan Walker",
@@ -37,6 +44,8 @@
   "homepage": "https://github.com/NathanWalker/nativescript-spotify",
   "readmeFilename": "README.md",
   "devDependencies": {
+    "tns-core-modules": "^2.1.0",
+    "tns-platform-declarations": "^2.0.0",
     "typescript": "^1.8.10"
   }
 }

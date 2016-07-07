@@ -2,7 +2,7 @@ import {Observable, EventData} from 'data/observable';
 import {TNSSpotifyConstants} from '../common';
 import {TNSSpotifyNotificationObserver} from './notification';
 
-declare var SPTAuth, SPTSession, SPTUser, SPTAuthStreamingScope, SPTAuthUserReadPrivateScope, SPTAuthUserReadEmailScope, SPTAuthUserLibraryModifyScope, SPTAuthUserLibraryReadScope, SPTAuthPlaylistReadPrivateScope, SPTAuthPlaylistModifyPrivateScope, SPTAuthPlaylistModifyPublicScope, UIApplication, NSURL, NSUserDefaults, NSNotificationCenter, NSKeyedArchiver, NSKeyedUnarchiver;
+declare var SPTAuth, SPTAuthViewDelegate, SPTAuthViewController, SPTSession, SPTUser, SPTAuthStreamingScope, SPTAuthUserReadPrivateScope, SPTAuthUserReadEmailScope, SPTAuthUserLibraryModifyScope, SPTAuthUserLibraryReadScope, SPTAuthPlaylistReadPrivateScope, SPTAuthPlaylistModifyPrivateScope, SPTAuthPlaylistModifyPublicScope, UIApplication, NSURL, NSUserDefaults, NSNotificationCenter, NSKeyedArchiver, NSKeyedUnarchiver, UIModalPresentationOverCurrentContext, UIModalTransitionStyleCrossDissolve, UIModalPresentationCurrentContext;
 
 class TNSSpotifyAuthDelegate extends NSObject {
   public static ObjCProtocols = [SPTAuthViewDelegate];
@@ -25,7 +25,7 @@ class TNSSpotifyAuthDelegate extends NSObject {
 export class TNSSpotifyAuth extends NSObject {
   public static REDIRECT_URL: string;
   public static TOKEN_REFRESH_ENDPOINT: string;
-  public static SESSION: SPTSession;
+  public static SESSION: any; // SPTSession
   public static AUTH_VIEW_SHOWING: boolean;
 
   // events

@@ -1,3 +1,5 @@
+declare var interop;
+
 export class TNSSpotifyNotificationObserver extends NSObject {
   private _onReceiveCallback: (notification: NSNotification) => void;
 

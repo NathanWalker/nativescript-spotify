@@ -2,11 +2,11 @@ import {Observable, EventData} from 'data/observable';
 import {TNSSpotifyConstants, TNSSpotifyTrackMetadataI, Utils} from '../common';
 import {TNSSpotifyAuth} from './auth';
 
-declare var SPTAudioStreamingPlaybackDelegate, SPTAudioStreamingController, NSObject, NSNotificationCenter, NSNotification, interop;
+declare var SPTAudioStreamingPlaybackDelegate, SPTAudioStreamingController, NSNotificationCenter, NSNotification, interop, SPTAlbum;
 
-export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlaybackDelegate {
+export class TNSSpotifyPlayer extends NSObject {
   public static ObjCProtocols = [SPTAudioStreamingPlaybackDelegate];
-  public player: SPTAudioStreamingController;
+  public player: any; // SPTAudioStreamingController
   public auth: TNSSpotifyAuth;
 
   // events  
@@ -119,7 +119,7 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
   }
   
   // Delegate methods
-  public audioStreamingDidChangePlaybackStatus(controller: SPTAudioStreamingController, playing: boolean) {
+  public audioStreamingDidChangePlaybackStatus(controller: any, playing: boolean) {
     console.log(`DidChangePlaybackStatus: ${playing}`);
     if (this.events) {
       this._changedPlaybackStatus.data.playing = playing;
@@ -127,7 +127,7 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     }
   }
   
-  public audioStreamingDidSeekToOffset(controller: SPTAudioStreamingController, offset: any) {
+  public audioStreamingDidSeekToOffset(controller: any, offset: any) {
     console.log(`DidSeekToOffset: ${offset}`);
     if (this.events) {
       this._seekedToOffset.data.offset = offset;
@@ -135,7 +135,7 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     }
   }
   
-  public audioStreamingDidChangeVolume(controller: SPTAudioStreamingController, volume: any) {
+  public audioStreamingDidChangeVolume(controller: any, volume: any) {
     console.log(`DidChangeVolume: ${volume}`);
     if (this.events) {
       this._changedVolume.data.volume = volume;
@@ -143,7 +143,7 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     }
   }
   
-  public audioStreamingDidChangeShuffleStatus(controller: SPTAudioStreamingController, isShuffled: boolean) {
+  public audioStreamingDidChangeShuffleStatus(controller: any, isShuffled: boolean) {
     console.log(`DidChangeShuffleStatus: ${isShuffled}`);
     if (this.events) {
       this._changedShuffleStatus.data.shuffle = isShuffled;
@@ -151,7 +151,7 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     }
   }
   
-  public audioStreamingDidChangeRepeatStatus(controller: SPTAudioStreamingController, isRepeated: boolean) {
+  public audioStreamingDidChangeRepeatStatus(controller: any, isRepeated: boolean) {
     console.log(`DidChangeRepeatStatus: ${isRepeated}`);
     if (this.events) {
       this._changedRepeatStatus.data.repeat = isRepeated;
@@ -159,7 +159,7 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     }
   }
   
-  public audioStreamingDidChangeToTrack(controller: SPTAudioStreamingController, trackMetadata: NSDictionary) {
+  public audioStreamingDidChangeToTrack(controller: any, trackMetadata: NSDictionary) {
     console.log(`DidChangeToTrack: ${trackMetadata}`);
     if (this.events) {
       this._changedToTrack.data.metadata = trackMetadata;
@@ -167,7 +167,7 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     }
   }
   
-  public audioStreamingDidFailToPlayTrack(controller: SPTAudioStreamingController, trackUri: NSURL) {
+  public audioStreamingDidFailToPlayTrack(controller: any, trackUri: NSURL) {
     console.log(`DidFailToPlayTrack: ${trackUri.absoluteString}`);
     if (this.events) {
       this._failedToPlayTrack.data.url = trackUri.absoluteString;
@@ -175,7 +175,7 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     }
   }
   
-  public audioStreamingDidStartPlayingTrack(controller: SPTAudioStreamingController, trackUri: NSURL) {
+  public audioStreamingDidStartPlayingTrack(controller: any, trackUri: NSURL) {
     console.log(`DidStartPlayingTrack: ${trackUri.absoluteString}`);
     this.updateCoverArt(this.currentTrackMetadata().albumUri);
     if (this.events) {
@@ -184,7 +184,7 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     }
   }
   
-  public audioStreamingDidStopPlayingTrack(controller: SPTAudioStreamingController, trackUri: NSURL) {
+  public audioStreamingDidStopPlayingTrack(controller: any, trackUri: NSURL) {
     console.log(`DidStopPlayingTrack: ${trackUri.absoluteString}`);
     if (this.events) {
       this._stoppedPlayingTrack.data.url = trackUri.absoluteString;
@@ -192,35 +192,35 @@ export class TNSSpotifyPlayer extends NSObject implements SPTAudioStreamingPlayb
     }
   }
   
-  public audioStreamingDidSkipToNextTrack(controller: SPTAudioStreamingController) {
+  public audioStreamingDidSkipToNextTrack(controller: any) {
     console.log(`DidSkipToNextTrack`);
     if (this.events) {
       this.events.notify(this._skippedToNextTrack);  
     }
   }
   
-  public audioStreamingDidSkipToPreviousTrack(controller: SPTAudioStreamingController) {
+  public audioStreamingDidSkipToPreviousTrack(controller: any) {
     console.log(`DidSkipToPreviousTrack`);
     if (this.events) {
       this.events.notify(this._skippedToPreviousTrack);  
     }
   }
   
-  public audioStreamingDidBecomeActivePlaybackDevice(controller: SPTAudioStreamingController) {
+  public audioStreamingDidBecomeActivePlaybackDevice(controller: any) {
     console.log(`DidBecomeActivePlaybackDevice`);
     if (this.events) {
       this.events.notify(this._activePlaybackDevice);  
     }
   }
   
-  public audioStreamingDidBecomeInactivePlaybackDevice(controller: SPTAudioStreamingController) {
+  public audioStreamingDidBecomeInactivePlaybackDevice(controller: any) {
     console.log(`DidBecomeInactivePlaybackDevice`);
     if (this.events) {
       this.events.notify(this._inactivePlaybackDevice);  
     }
   }
   
-  public audioStreamingDidPopQueue(controller: SPTAudioStreamingController) {
+  public audioStreamingDidPopQueue(controller: any) {
     console.log(`DidPopQueue`);
     if (this.events) {
       this.events.notify(this._poppedQueue);  
