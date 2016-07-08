@@ -42,9 +42,23 @@ export class TNSSpotifyAuth extends NSObject {
   }
   
   public static LOGIN() {
+    // console.log(`SPTAuthStreamingScope:`);
+    // console.log(typeof SPTAuthStreamingScope);
     SPTAuth.defaultInstance().clientID = TNSSpotifyConstants.CLIENT_ID;
     SPTAuth.defaultInstance().redirectURL = NSURL.URLWithString(TNSSpotifyAuth.REDIRECT_URL);
-    SPTAuth.defaultInstance().requestedScopes = [SPTAuthStreamingScope, SPTAuthUserReadPrivateScope, SPTAuthUserReadEmailScope, SPTAuthUserLibraryModifyScope, SPTAuthUserLibraryReadScope, SPTAuthPlaylistReadPrivateScope, SPTAuthPlaylistModifyPrivateScope, SPTAuthPlaylistModifyPublicScope, 'playlist-read-collaborative']; // no constant for last one: https://github.com/spotify/ios-sdk/issues/423
+
+    SPTAuth.defaultInstance().requestedScopes = [
+      'streaming',
+      'user-read-private',
+      'user-read-email',
+      'user-library-modify',
+      'user-library-read',
+      'playlist-read-private',
+      'playlist-modify-private',
+      'playlist-modify-public',
+      'playlist-read-collaborative'];
+
+    // SPTAuth.defaultInstance().requestedScopes = [SPTAuthStreamingScope, SPTAuthUserReadPrivateScope, SPTAuthUserReadEmailScope, SPTAuthUserLibraryModifyScope, SPTAuthUserLibraryReadScope, SPTAuthPlaylistReadPrivateScope, SPTAuthPlaylistModifyPrivateScope, SPTAuthPlaylistModifyPublicScope, 'playlist-read-collaborative']; // no constant for last one: https://github.com/spotify/ios-sdk/issues/423
     
     // let url = SPTAuth.defaultInstance().loginURL;
     // UIApplication.sharedApplication().openURL(url);

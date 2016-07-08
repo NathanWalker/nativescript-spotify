@@ -58,45 +58,72 @@ FOUNDATION_EXPORT NSString * const SPTAudioStreamingMetadataTrackDuration DEPREC
 ///----------------------------
 
 // Hide parameterless init
--(id)init __attribute__((unavailable("init not available, use initWithClientId")));
-+(id)new __attribute__((unavailable("new not available, use alloc and initWithClientId")));
+-(id)init __attribute__((unavailable("init not available, use +sharedInstance")));
++(id)new __attribute__((unavailable("new not available, use +sharedInstance")));
 
-/** Initialise a new `SPAudioStreamingController`.
- 
- @param clientId Your client id.
- @return Returns an initialised `SPAudioStreamingController` instance.
- */
--(id)initWithClientId:(NSString *)clientId;
 
-/** Initialise a new `SPAudioStreamingController` with a custom audio controller.
- 
- @param clientId Your client id.
- @param audioController Audio controller.
- @return Returns an initialised `SPAudioStreamingController` instance.
+/**
+ Access the shared `SPAudioStreamingController` instance
+ @return Returns the shared `SPAudioStreamingController` instance
  */
--(id)initWithClientId:(NSString *)clientId audioController:(SPTCoreAudioController *)audioController;
++ (instancetype)sharedInstance;
+
+/** Start the `SPAudioStreamingController` thread with a custom audio controller.
+ 
+ @note You MUST initialize the `SPAudioStreamingController sharedInstance` before calling any other method.
+ 
+ @param clientId Your client id found at developer.spotify.com
+ @param audioController Custom audio controller
+ @param error If method returns NO, error will be set
+ @return Returns YES if initialization was successful
+ */
+-(BOOL)startWithClientId:(NSString *)clientId audioController:(SPTCoreAudioController *)audioController error:(NSError *__autoreleasing*)error;
+
+/** Start the `SPAudioStreamingController` thread with the default audioController.
+ 
+ @note You need to start the `SPAudioStreamingController sharedInstance` before calling any other method.
+ 
+ @param clientId Your client id found at developer.spotify.com
+ @param error If method returns NO, error will be set
+ @return Returns YES if initialization was successful
+ */
+-(BOOL)startWithClientId:(NSString *)clientId error:(NSError *__autoreleasing*)error;
+
+/** Shut down the `SPTAudioStreamingController` thread.
+ @note If a user is currently logged in, the application should first call
+  logout and wait for the `-audioStreamingDidLogout:` delegate method
+ @param error If method returns NO, error will be set
+ @return Returns YES if initialization was successful
+ */
+-(BOOL)stopWithError:(NSError *__autoreleasing*)error;
+
 
 /** Log into the Spotify service for audio playback.
  
  Audio playback will not be available until the receiver is successfully logged in.
  
- @param session The session to log in with. Must be valid and authenticated with the
- `SPTAuthStreamingScope` scope.
- @param block The callback block to be executed when login succeeds or fails. In the cause of
- failure, an `NSError` object will be passed.
+ @discussion Login is asynchronous. 
+ Success will be notified on the `audioStreamingDidLogin:` delegate method and 
+ failure will be notified on the `audioStreaming:didEncounterError:` delegate method.
+ 
+ @param accessToken An authenticated access token authorized with the `SPTAuthStreamingScope` scope.
  */
--(void)loginWithSession:(SPTSession *)session callback:(SPTErrorableOperationCallback)block;
+-(void)loginWithAccessToken:(NSString *)accessToken;
+
 
 /** Log out of the Spotify service
-
- @param block The callback block to be executed when logout succeeds or fails. In the cause of
- failure, an `NSError` object will be passed.
+ 
+ @discussion This method is asynchronous. When logout is complete you will be notified by the
+ `audioStreamingDidLogout:` delegate method.
  */
--(void)logout:(SPTErrorableOperationCallback)block;
+-(void)logout;
 
 ///----------------------------
 /// @name Properties
 ///----------------------------
+
+/** YES while the `SPTAudioStreamingController` is initialized */
+@property (nonatomic, readonly, assign) BOOL initialized;
 
 /** Returns `YES` if the receiver is logged into the Spotify service, otherwise `NO`. */
 @property (nonatomic, readonly) BOOL loggedIn;

@@ -29,12 +29,12 @@ FOUNDATION_EXPORT const NSUInteger SPTDiskCacheBlockSize;
 /**
  * @brief The URI of the cached object.
  */
-@property (nonatomic) NSURL *URI;
+@property (nonatomic, copy) NSURL *URI;
 
 /**
  * @brief The unique identifier for the cached object.
  */
-@property (nonatomic) NSString *itemID;
+@property (nonatomic, copy) NSString *itemID;
 
 /**
  * @brief The offset of the cached object.
@@ -45,7 +45,7 @@ FOUNDATION_EXPORT const NSUInteger SPTDiskCacheBlockSize;
 /**
  * @brief The data of the cached object.
  */
-@property (nonatomic) NSData *data;
+@property (nonatomic, copy) NSData *data;
 
 /**
  * @brief The total size of the cached object.
