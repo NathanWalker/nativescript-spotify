@@ -1,8 +1,9 @@
 import {Observable, EventData} from 'data/observable';
 import {TNSSpotifyConstants, TNSSpotifyTrackMetadataI, Utils} from '../common';
 import {TNSSpotifyAuth} from './auth';
+import * as dialogs from 'ui/dialogs';
 
-declare var SPTAudioStreamingPlaybackDelegate, SPTAudioStreamingController, NSNotificationCenter, NSNotification, interop, SPTAlbum;
+declare var SPTAudioStreamingPlaybackDelegate, SPTAudioStreamingController, NSNotificationCenter, NSNotification, interop, SPTAlbum, SPTDiskCache;
 
 export class TNSSpotifyPlayer extends NSObject {
   public static ObjCProtocols = [SPTAudioStreamingPlaybackDelegate];
@@ -228,24 +229,35 @@ export class TNSSpotifyPlayer extends NSObject {
   }
   
   private play(track: string): Promise<any> {
-    this.checkPlayer();
     return new Promise((resolve, reject) => {
-      if (!this._playerLoggedIn) {
-        this.player.loginWithSessionCallback(TNSSpotifyAuth.SESSION, (error) => {
-          if (error != null) {
-            console.log(`*** Enabling playback, received error: ${error}`);
+      if (!this.checkPlayer()) {
+        reject('login');
+        return;
+      }
 
-            if (this.isLoginError(error.localizedDescription)) {
-              this.loginError();
-              reject('login');
-            } else {
-              reject(false);
-            }
-            return;
-          }
-          this._playerLoggedIn = true;
-          this.playUri(track, resolve, reject);
-        });  
+      if (!this._playerLoggedIn) {
+        // console.log(`this.player:`, this.player);
+        // for (let key in this.player) {
+        //   console.log(key);
+        // }
+        // this.player.loginWithSessionCallback(TNSSpotifyAuth.SESSION, (error) => {
+        //   if (error != null) {
+        //     console.log(`*** Enabling playback, received error: ${error}`);
+
+        //     if (this.isLoginError(error.localizedDescription)) {
+        //       this.loginError();
+        //       reject('login');
+        //     } else {
+        //       reject(false);
+        //     }
+        //     return;
+        //   }
+        //   this._playerLoggedIn = true;
+        //   this.playUri(track, resolve, reject);
+        // });  
+        this.player.loginWithAccessToken(TNSSpotifyAuth.SESSION.accessToken);
+        this._playerLoggedIn = true;
+        this.playUri(track, resolve, reject);
       } else {
         this.playUri(track, resolve, reject);
       }
@@ -273,10 +285,24 @@ export class TNSSpotifyPlayer extends NSObject {
     });
   }
   
-  private checkPlayer() {
+  private checkPlayer():boolean {
     if (!this.player) {
-      this.player = SPTAudioStreamingController.alloc().initWithClientId(TNSSpotifyConstants.CLIENT_ID);
-      this.player.playbackDelegate = this;
+      // this.player = SPTAudioStreamingController.alloc().initWithClientId(TNSSpotifyConstants.CLIENT_ID);
+      let errorRef = new interop.Reference();
+      this.player = SPTAudioStreamingController.sharedInstance();
+      if (this.player.startWithClientIdError(TNSSpotifyConstants.CLIENT_ID, errorRef)) {
+        if (errorRef) {
+          console.log(`SPTAudioStreamingController.sharedInstance().startWithClientIdError`, errorRef);
+        }
+        this.player.playbackDelegate = this;
+        this.player.diskCache = SPTDiskCache.alloc().initWithCapacity(1024 * 1024 * 64);
+        return true;
+      } else {
+        dialogs.alert('An error occurred while trying to initialize the player.');
+        return false;
+      }
+    } else {
+      return true;
     }
   }
   

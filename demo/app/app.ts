@@ -6,10 +6,8 @@ class MyDelegate extends UIResponder {
   
   public applicationDidFinishLaunchingWithOptions(application: UIApplication, launchOptions: NSDictionary): boolean {
     
-    // TNSSpotifyConstants.CLIENT_ID = 'your spotify client id here';
-    // TNSSpotifyAuth.REDIRECT_URL = 'tnsspotify://spotifylogin';
-    TNSSpotifyConstants.CLIENT_ID = '1acac12e7fc448e188d8d70aa14249df';
-    TNSSpotifyAuth.REDIRECT_URL = 'shoutoutplay://spotifylogin';
+    TNSSpotifyConstants.CLIENT_ID = 'your spotify client id here';
+    TNSSpotifyAuth.REDIRECT_URL = 'tnsspotify://spotifylogin';
     return true;
   }
   

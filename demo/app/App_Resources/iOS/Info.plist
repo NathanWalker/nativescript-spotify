@@ -64,7 +64,7 @@
 			<string>org.nativescript.demo</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-					<string>shoutoutplay</string>
+					<string>tnsspotify</string>
 			</array>
 		</dict>
 	</array>

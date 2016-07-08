@@ -111,6 +111,10 @@ export class SpotifyDemo extends Observable {
   
   public updateTrackInfo() {
     let metadata: TNSSpotifyTrackMetadataI = this._spotify.currentTrackMetadata();
+    console.log(metadata);
+    for (let key in metadata) {
+      console.log(metadata[key]);
+    }
     this.set(`albumName`, `Album: ${metadata.albumName}`);
     this.set(`albumUri`, `Album URI: ${metadata.albumUri}`);
     this.set(`artistName`, `Artist: ${metadata.artistName}`);
@@ -177,7 +181,7 @@ export class SpotifyDemo extends Observable {
     let page = topmost().currentPage;
     let metadata = page.getViewById('metadata');
     metadata.animate({
-      translate: { x: 30, y: this._metadataVisible ? 0 : -300 },
+      translate: { x: 30, y: this._metadataVisible ? 200 : -300 },
       opacity:  this._metadataVisible ? .8 : 0,
       duration: 300
     });
@@ -209,10 +213,12 @@ export class SpotifyDemo extends Observable {
   }
 
   private playNextTrack() {
-    if (this._playlistItemPlayingIndex + 1 < this.playlistItems.length) {
-      this.playlistItemTap({ index: this._playlistItemPlayingIndex + 1 });
-    } else {
-      this.playlistItemTap({ index: 0 });
+    if (this.playlistItems) {
+      if (this._playlistItemPlayingIndex + 1 < this.playlistItems.length) {
+        this.playlistItemTap({ index: this._playlistItemPlayingIndex + 1 });
+      } else {
+        this.playlistItemTap({ index: 0 });
+      }
     }
   }
   
