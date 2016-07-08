@@ -111,10 +111,6 @@ export class SpotifyDemo extends Observable {
   
   public updateTrackInfo() {
     let metadata: TNSSpotifyTrackMetadataI = this._spotify.currentTrackMetadata();
-    console.log(metadata);
-    for (let key in metadata) {
-      console.log(metadata[key]);
-    }
     this.set(`albumName`, `Album: ${metadata.albumName}`);
     this.set(`albumUri`, `Album URI: ${metadata.albumUri}`);
     this.set(`artistName`, `Artist: ${metadata.artistName}`);
