@@ -16,8 +16,9 @@
 
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
-#import <Spotify/Spotify.h>
 
+@class SPTAuth;
+@class SPTSession;
 @class SPTAuthViewController;
 
 /** A ViewController for managing the login flow inside your app. */
