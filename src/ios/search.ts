@@ -14,29 +14,40 @@ export class TNSSpotifySearch {
       if (query.length === 0) {
         return;
       }
-      SPTSearch.performSearchWithQueryQueryTypeOffsetAccessTokenCallback(NSURL.URLWithString(query), queryType, offset, TNSSpotifyAuth.SESSION.accessToken, (error, results) => {
-        if (error != null) {
-          console.log(`*** Item query error: ${error}`);
-          reject();
-          return;
-        }
-        console.log(results);
-        if (results && results.items) {
-          let result: any = {
-            page: offset,
-            hasNextPage: results.hasNextPage,
-            totalListLength: results.totalListLength
-          };
-          switch (queryType) {
-            case 'track':
-              result.tracks = TNSSpotifySearch.TRACKS_FROM_RESULTS(results)
-              break;
+      console.log(`TNSSpotifySearch.QUERY offset: ${offset}`);
+      TNSSpotifyAuth.VERIFY_SESSION(TNSSpotifyAuth.SESSION).then(() => {
+        SPTSearch.performSearchWithQueryQueryTypeOffsetAccessTokenCallback(NSURL.URLWithString(query), queryType, offset, TNSSpotifyAuth.SESSION.accessToken, (error, results) => {
+          if (error != null) {
+            console.log(`*** Item query error: ${error}`);
+            console.log(error);
+            for (let key in error) {
+              console.log('-----');
+              console.log(key);
+              console.log(error[key]);
+            }
+            reject();
+            return;
           }
-          resolve(result);
-        } else {
-          // no results
-          reject();
-        }
+          console.log(results);
+          if (results && results.items) {
+            let result: any = {
+              page: offset,
+              hasNextPage: results.hasNextPage,
+              totalListLength: results.totalListLength
+            };
+            switch (queryType) {
+              case 'track':
+                result.tracks = TNSSpotifySearch.TRACKS_FROM_RESULTS(results)
+                break;
+            }
+            resolve(result);
+          } else {
+            // no results
+            reject();
+          }
+        });
+      }, () => {
+        reject();
       });
     });
   }
@@ -55,7 +66,8 @@ export class TNSSpotifySearch {
         duration: trackObj.duration,
         playableUri: trackObj.playableUri.absoluteString,
         previewUrl: trackObj.previewURL.absoluteString,
-        album: trackObj.album
+        album: trackObj.album,
+        playing: false
       };
       items.push(track);
     }

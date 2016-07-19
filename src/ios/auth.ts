@@ -1,8 +1,9 @@
 import {Observable, EventData} from 'data/observable';
+import * as dialogs from 'ui/dialogs';
 import {TNSSpotifyConstants} from '../common';
 import {TNSSpotifyNotificationObserver} from './notification';
 
-declare var SPTAuth, SPTAuthViewDelegate, SPTAuthViewController, SPTSession, SPTUser, SPTAuthStreamingScope, SPTAuthUserReadPrivateScope, SPTAuthUserReadEmailScope, SPTAuthUserLibraryModifyScope, SPTAuthUserLibraryReadScope, SPTAuthPlaylistReadPrivateScope, SPTAuthPlaylistModifyPrivateScope, SPTAuthPlaylistModifyPublicScope, UIApplication, NSURL, NSUserDefaults, NSNotificationCenter, NSKeyedArchiver, NSKeyedUnarchiver, UIModalPresentationOverCurrentContext, UIModalTransitionStyleCrossDissolve, UIModalPresentationCurrentContext;
+declare var SPTAuth, SPTAuthViewDelegate, SPTAuthViewController, SPTProduct, SPTSession, SPTUser, SPTAuthStreamingScope, SPTAuthUserReadPrivateScope, SPTAuthUserReadEmailScope, SPTAuthUserLibraryModifyScope, SPTAuthUserLibraryReadScope, SPTAuthPlaylistReadPrivateScope, SPTAuthPlaylistModifyPrivateScope, SPTAuthPlaylistModifyPublicScope, UIApplication, NSURL, NSUserDefaults, NSNotificationCenter, NSKeyedArchiver, NSKeyedUnarchiver, UIModalPresentationOverCurrentContext, UIModalTransitionStyleCrossDissolve, UIModalPresentationCurrentContext;
 
 class TNSSpotifyAuthDelegate extends NSObject {
   public static ObjCProtocols = [SPTAuthViewDelegate];
@@ -27,6 +28,7 @@ export class TNSSpotifyAuth extends NSObject {
   public static TOKEN_REFRESH_ENDPOINT: string;
   public static SESSION: any; // SPTSession
   public static AUTH_VIEW_SHOWING: boolean;
+  public static PREMIUM_MSG: string = 'We are so sorry! Music streaming on mobile requires a Spotify Premium account. You can check out more at http://spotify.com. Last time we checked it was $9.99/month with the first 30 days free.';
 
   // events
   public events: Observable;
@@ -64,6 +66,7 @@ export class TNSSpotifyAuth extends NSObject {
     // UIApplication.sharedApplication().openURL(url);
     let authvc = SPTAuthViewController.authenticationViewController();
     authvc.delegate = new TNSSpotifyAuthDelegate();
+    authvc.clearCookies(() => 1);
     authvc.modalPresentationStyle = UIModalPresentationOverCurrentContext;
     authvc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     let rootview = UIApplication.sharedApplication().keyWindow.rootViewController;
@@ -109,28 +112,48 @@ export class TNSSpotifyAuth extends NSObject {
     NSNotificationCenter.defaultCenter().postNotificationNameObject(TNSSpotifyConstants.NOTIFY_LOGIN_SUCCESS, null);
   }  
   
-  public static INIT_SESSION(): Promise<any> {
+  public static VERIFY_SESSION(session?: any): Promise<any> {
     return new Promise((resolve, reject) => {
-      let sessionObj = TNSSpotifyAuth.GET_STORED_SESSION();
-      if (sessionObj) {
-        // check if refresh needed
-        let sessionData = sessionObj; // NSData
-        let session = NSKeyedUnarchiver.unarchiveObjectWithData(sessionData);
+      console.log(`verifying Spotify session...`);
+      // when verifying existing via argument, may need to log user out with notice
+      let checkExisting = true;
+      if (!session) {
+        // just initializing
+        checkExisting = false;
+        let sessionObj = TNSSpotifyAuth.GET_STORED_SESSION();
+        if (sessionObj) {
+          // check if refresh needed
+          // let sessionData = sessionObj; // NSData
+          session = NSKeyedUnarchiver.unarchiveObjectWithData(sessionObj);
+        }
+      }
 
-        if (session) {
-          
-          if (!session.isValid()) {
-            // renew session
-            TNSSpotifyAuth.RENEW_SESSION(session).then(resolve, reject);
-          } else {
-            TNSSpotifyAuth.SESSION = session;
-            resolve();
-          }
-        } else {
-          reject();
-        }     
-      } else {
+      let showErrorAndLogout = () => {
+        console.log(`showErrorAndLogout`)
+        if (checkExisting) {
+          console.log(`error renewing, calling TNSSpotifyAuth.LOGOUT()`);
+          TNSSpotifyAuth.LOGOUT();
+          setTimeout(() => {
+            dialogs.alert('Please re-login.');
+          });
+        }
         reject();
+      };
+
+      if (session) {
+        if (!session.isValid()) {
+          console.log('NOT VALID.');
+          // renew session
+          TNSSpotifyAuth.RENEW_SESSION(session).then(resolve, () => {
+            showErrorAndLogout();
+          });
+        } else {
+          console.log('VALID.');
+          TNSSpotifyAuth.SESSION = session;
+          resolve();
+        }
+      } else {
+        showErrorAndLogout();
       }
     });
   }
@@ -151,6 +174,7 @@ export class TNSSpotifyAuth extends NSObject {
   
   public static RENEW_SESSION(session: any): Promise<any> {
     return new Promise((resolve, reject) => {
+      console.log(`trying to renew Spotify session...`);
       // SPTAuth.defaultInstance().renewSessionWithServiceEndpointAtURLCallback(session, NSURL.URLWithString(TNSSpotifyAuth.TOKEN_REFRESH_ENDPOINT), (error, session) => {
       SPTAuth.defaultInstance().renewSessionCallback(session, (error, session) => {
         if (error != null) {
@@ -159,6 +183,7 @@ export class TNSSpotifyAuth extends NSObject {
           return;
         }
         
+        console.log('RENEWED.');
         TNSSpotifyAuth.SAVE_SESSION(session);
         resolve();
       });
@@ -180,6 +205,30 @@ export class TNSSpotifyAuth extends NSObject {
       } else {
         reject();
       }
+    });
+  }
+
+  public static CHECK_PREMIUM(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      TNSSpotifyAuth.CURRENT_USER().then((user: any) => {
+        if (user && user.product) {
+          // 0: SPTProduct.SPTProductFree
+          // 1: SPTProduct.SPTProductUnlimited
+          // 2: SPTProduct.SPTProductPremium
+          // 3: SPTProduct.SPTProductUnknown
+
+          console.log(`User Product: ${user.product}`);
+          if (user.product == 0 || user.product == 3) {
+            dialogs.alert(TNSSpotifyAuth.PREMIUM_MSG);
+            TNSSpotifyAuth.LOGOUT();
+            reject();
+          } else {
+            resolve();
+          }         
+        } else {
+          reject();
+        }
+      }, reject);
     });
   }
 

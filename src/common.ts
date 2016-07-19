@@ -19,6 +19,7 @@ export interface TNSTrack {
   playableUri: string;
   previewUrl: string;
   album: any;
+  playing: boolean;
 }
 
 export class TNSSpotifyConstants {

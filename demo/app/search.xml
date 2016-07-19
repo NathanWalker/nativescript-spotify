@@ -7,7 +7,7 @@
           <Image src="~/assets/login-btn.png" tap="{{login}}" visibility="{{loggedIn ? 'collapsed' : 'visible'}}" class="login-btn"/> 
           <SearchBar submit="{{search}}" visibility="{{loggedIn ? 'visible' : 'collapsed'}}"></SearchBar>
           
-          <ListView items="{{searchResults}}" itemTap="{{resultTap}}" row="1" separatorColor="#333" backgroundColor="#000" visibility="{{loggedIn ? 'visible' : 'collapsed'}}">
+          <ListView items="{{searchResults}}" itemTap="{{resultTap}}" loadMoreItems="{{loadMore}}" row="1" separatorColor="#333" backgroundColor="#000" visibility="{{loggedIn ? 'visible' : 'collapsed'}}">
             <ListView.itemTemplate>
               <StackLayout backgroundColor="#000">
                 <GridLayout columns="auto, *" rows="auto" class="list-item">

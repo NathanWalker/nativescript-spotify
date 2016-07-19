@@ -196,12 +196,24 @@ Event |  Description
 `activePlaybackDevice` | When the audio streaming object becomes the active playback device on the user’s account.
 `inactivePlaybackDevice` | When the audio streaming object becomes an inactive playback device on the user’s account.
 `poppedQueue` | When the audio streaming object becomes an inactive playback device on the user’s account.
+`temporaryConnectionError` | A temporary connection error occurred.
+`streamError` | Sends along `data` = `error: any` when a streaming error occurred.
+`receivedMessage` | Sends along `data` = `message: string` when a message is received from the Spotify service.
+`streamDisconnected` | When the stream becomes disconnected.
 
 ### TNSSpotifyAuth
 
 TNSSpotifyAuth
 
-Provides `static` methods to help with authentication handling and user management.
+Provides `static` properties and methods to help with authentication handling and user management.
+
+#### Properties
+
+Property |  Description
+-------- | ---------
+`REDIRECT_URL`: `string` | Used to set your spotify application redirect url, required for device auth redirect, ie: `'your-app-custom-url-scheme://spotifylogin'`
+`SESSION`: `SPTSession` | Represents the current auth session.
+`PREMIUM_MSG`: `string` | The message which alerts when a non-premium user attempts to play a track.
 
 #### Methods
 
@@ -211,7 +223,7 @@ Method |  Description
 `LOGIN_WITH_SESSION(session)`: `void` | Logs user in with session returned from the in-app browser auth window.
 `LOGOUT()`: `void` | Clear's persisted user session and notifies of login change.
 `HANDLE_AUTH_CALLBACK(url)`: `boolean` | When using standard browser redirect auth, this can be used in application launch phase to handle the auth redirect back into the app. On older versions, this may be needed.
-`INIT_SESSION()`: `Promise<any>` | Mainly used internally, but used to restore a session from local persistence and/or renew.
+`VERIFY_SESSION(session?: any)`: `Promise<any>` | Mainly used internally, but used to restore a session from local persistence and/or renew.
 `SAVE_SESSION(session)`: `void` | Mainly used internally, but can be used to persist a valid Spotify session.
 `GET_STORED_SESSION()`: `any` | Get the current user's session. [Learn more here](https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTSession.html)
 `RENEW_SESSION(session)`: `Promise<any>` | Can be used to pass an expired session to renew it.

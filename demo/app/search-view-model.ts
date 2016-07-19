@@ -24,6 +24,9 @@ export class SpotifySearchDemo extends Observable {
   private _loader: any;
   private _currentTrack: string;
   private _resultPlayingIndex: number;
+  private _currentQuery: string;
+  private _currentOffset: number = 0;
+  private _loadingMore: boolean = false;
 
   constructor() {
     super();
@@ -78,12 +81,31 @@ export class SpotifySearchDemo extends Observable {
   public search(e: any) {
     if (e && e.object) {
       console.log(e.object.text);
-      TNSSpotifySearch.QUERY(e.object.text, 'track').then((result) => {
+      if (this._currentQuery !== e.object.text) {
+        this._currentQuery = e.object.text;
+        // reset offset whenever query changes
+        this._currentOffset = 0;
+      }
+      console.log(`offset: ${this._currentOffset}`);
+      TNSSpotifySearch.QUERY(e.object.text, 'track', this._currentOffset).then((result) => {
         console.log(result);
         this.set('searchResults', result.tracks);
       }, () => {
         Utils.alert('No tracks found!');
       });
+    }
+  }
+
+  public loadMore(e: any) {
+    if (!this._loadingMore) {
+      console.log('loading more...');
+      this._loadingMore = true;
+      this._currentOffset = this._currentOffset + 20;
+      this.search({ object: { text: this._currentQuery } });
+      setTimeout(() => {
+        // prevent multiple triggers
+        this._loadingMore = false;
+      }, 1000);
     }
   }
   
