@@ -5,47 +5,74 @@ declare var SPTSearch, NSURL;
 
 export class TNSSpotifySearch {
   //https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTRequest.html
+  public static CURRENT_LIST: any;
+  public static CURRENT_SEARCH_QUERY: string;
 
   public static QUERY(query: string, queryType: string, offset: number = 0): Promise<any> {
     // query: search term
     // queryType: album, artist, playlist, and track
     query = query && query.length ? query.replace(' ', '+') : '';
+
     return new Promise((resolve, reject) => {  
       if (query.length === 0) {
         return;
       }
+
+      let reset = false;
+      if (TNSSpotifySearch.CURRENT_SEARCH_QUERY !== query) {
+        TNSSpotifySearch.CURRENT_SEARCH_QUERY = query;
+        // always reset with new queries
+        reset = true;
+        TNSSpotifySearch.CURRENT_LIST = undefined;
+      }
+
+      let processResults = (error: any, results: any) => {
+        if (error != null) {
+          console.log(`*** Spotify search error:`);
+          console.log(error);
+          for (let key in error) {
+            console.log('-----');
+            console.log(key);
+            console.log(error[key]);
+          }
+          reject();
+          return;
+        }
+        
+        TNSSpotifySearch.CURRENT_LIST = results;
+        console.log(results);
+        if (results && results.items) {
+          let result: any = {
+            page: offset,
+            hasNextPage: results.hasNextPage,
+            totalListLength: results.totalListLength
+          };
+          switch (queryType) {
+            case 'track':
+              result.tracks = TNSSpotifySearch.TRACKS_FROM_RESULTS(results)
+              break;
+          }
+          resolve(result);
+        } else {
+          // no results
+          reject();
+        }
+      };
+
       console.log(`TNSSpotifySearch.QUERY offset: ${offset}`);
       TNSSpotifyAuth.VERIFY_SESSION(TNSSpotifyAuth.SESSION).then(() => {
-        SPTSearch.performSearchWithQueryQueryTypeOffsetAccessTokenCallback(NSURL.URLWithString(query), queryType, offset, TNSSpotifyAuth.SESSION.accessToken, (error, results) => {
-          if (error != null) {
-            console.log(`*** Item query error: ${error}`);
-            console.log(error);
-            for (let key in error) {
-              console.log('-----');
-              console.log(key);
-              console.log(error[key]);
-            }
-            reject();
-            return;
-          }
-          console.log(results);
-          if (results && results.items) {
-            let result: any = {
-              page: offset,
-              hasNextPage: results.hasNextPage,
-              totalListLength: results.totalListLength
-            };
-            switch (queryType) {
-              case 'track':
-                result.tracks = TNSSpotifySearch.TRACKS_FROM_RESULTS(results)
-                break;
-            }
-            resolve(result);
-          } else {
-            // no results
-            reject();
-          }
-        });
+        if (!reset && offset > 0 && TNSSpotifySearch.CURRENT_LIST) {
+
+          if (TNSSpotifySearch.CURRENT_LIST.hasNextPage) {
+            // get next page
+            TNSSpotifySearch.CURRENT_LIST.requestNextPageWithAccessTokenCallback(TNSSpotifyAuth.SESSION.accessToken, processResults);
+          }          
+          
+        } else {
+
+          SPTSearch.performSearchWithQueryQueryTypeOffsetAccessTokenCallback(NSURL.URLWithString(query), queryType, offset, TNSSpotifyAuth.SESSION.accessToken, processResults);
+        }
+
       }, () => {
         reject();
       });

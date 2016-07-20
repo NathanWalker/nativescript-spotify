@@ -88,8 +88,12 @@ export class SpotifySearchDemo extends Observable {
       }
       console.log(`offset: ${this._currentOffset}`);
       TNSSpotifySearch.QUERY(e.object.text, 'track', this._currentOffset).then((result) => {
-        console.log(result);
-        this.set('searchResults', result.tracks);
+        // console.log(result);
+        if (this._currentOffset > 0) {
+          this.set('searchResults', [...this.searchResults, ...result.tracks]);
+        } else {
+          this.set('searchResults', result.tracks);
+        }
       }, () => {
         Utils.alert('No tracks found!');
       });
