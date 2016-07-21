@@ -22,6 +22,13 @@ export interface TNSTrack {
   playing: boolean;
 }
 
+export interface TNSPlaylist {
+  uri: string;
+  name: string;
+  tracks: any;
+  playing: boolean;
+}
+
 export class TNSSpotifyConstants {
   public static CLIENT_ID: string;
   public static NOTIFY_AUTH_LOGIN_CHANGE: string = `SpotifyLoginChange`;

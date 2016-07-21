@@ -280,6 +280,13 @@ export class SpotifyDemo extends Observable {
     TNSSpotifyAuth.CURRENT_USER().then((user) => {
       console.log(user);
       this.set(`accountName`, user.displayName);
+
+      // test out playlist results
+      TNSSpotifyPlaylist.MINE().then((result: any) => {
+        console.log('fetch all playlists:');
+        console.log(result.playlists);
+        console.log(result.playlists.length);
+      });
     }, () => {
       this.set(`accountName`, '');
     })

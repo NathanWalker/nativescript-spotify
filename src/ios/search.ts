@@ -86,14 +86,27 @@ export class TNSSpotifySearch {
     for (let i = 0; i < cnt; i++) {
       let trackObj = itemNSArray.objectAtIndex(i);
       // console.log(trackObj.artists);
+      let spotifyArtist = trackObj.artists.objectAtIndex(0);
+      let artist = {
+        id: spotifyArtist.identifier,
+        name: spotifyArtist.name,
+        uri: spotifyArtist.uri.absoluteString
+      };
+      let spotifyAlbum = trackObj.album;
+      let album = {
+        id: spotifyAlbum.identifier,
+        name: spotifyAlbum.name,
+        uri: spotifyAlbum.uri.absoluteString
+      };
+
       let track: TNSTrack = {
         id: trackObj.identifier,
         name: trackObj.name,
-        artist: trackObj.artists.objectAtIndex(0),
+        artist: artist,
         duration: trackObj.duration,
         playableUri: trackObj.playableUri.absoluteString,
         previewUrl: trackObj.previewURL.absoluteString,
-        album: trackObj.album,
+        album: album,
         playing: false
       };
       items.push(track);

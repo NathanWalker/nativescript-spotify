@@ -536,12 +536,4 @@ export class TNSSpotifyPlayer extends NSObject {
       eventName: 'streamDisconnected'
     };
   } 
-
-
-  public audioStreamingDidDisconnect(controller: any) {
-    console.log(`audioStreamingDidDisconnect`);
-    if (this.events) {
-      this.events.notify(this._streamDisconnected);  
-    }
-  }
 }
