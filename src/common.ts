@@ -16,8 +16,6 @@ export interface TNSTrack {
   name: string;
   artist: any;
   duration: number;
-  playableUri: string;
-  previewUrl: string;
   album: any;
   playing: boolean;
 }

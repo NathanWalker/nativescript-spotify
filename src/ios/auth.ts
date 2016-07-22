@@ -27,6 +27,7 @@ export class TNSSpotifyAuth extends NSObject {
   public static REDIRECT_URL: string;
   public static TOKEN_REFRESH_ENDPOINT: string;
   public static SESSION: any; // SPTSession
+  public static CLEAR_COOKIES: boolean = false;
   public static AUTH_VIEW_SHOWING: boolean;
   public static PREMIUM_MSG: string = 'We are so sorry! Music streaming on mobile requires a Spotify Premium account. You can check out more at http://spotify.com. Last time we checked it was $9.99/month with the first 30 days free.';
 
@@ -66,7 +67,9 @@ export class TNSSpotifyAuth extends NSObject {
     // UIApplication.sharedApplication().openURL(url);
     let authvc = SPTAuthViewController.authenticationViewController();
     authvc.delegate = new TNSSpotifyAuthDelegate();
-    authvc.clearCookies(() => 1);
+    if (TNSSpotifyAuth.CLEAR_COOKIES) {
+      authvc.clearCookies(() => 1);
+    }
     authvc.modalPresentationStyle = UIModalPresentationOverCurrentContext;
     authvc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     let rootview = UIApplication.sharedApplication().keyWindow.rootViewController;

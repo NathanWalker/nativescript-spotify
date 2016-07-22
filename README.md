@@ -213,6 +213,7 @@ Property |  Description
 -------- | ---------
 `REDIRECT_URL`: `string` | Used to set your spotify application redirect url, required for device auth redirect, ie: `'your-app-custom-url-scheme://spotifylogin'`
 `SESSION`: `SPTSession` | Represents the current auth session.
+`CLEAR_COOKIES`: `boolean` | Clear cookies in auth window to not remember last logged in user. Defaults `false`.
 `PREMIUM_MSG`: `string` | The message which alerts when a non-premium user attempts to play a track.
 
 #### Methods
