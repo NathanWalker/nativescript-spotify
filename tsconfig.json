@@ -7,7 +7,7 @@
         "sourceMap": true,
         "declaration": true,
         "noEmitOnError": false,
-        "noEmitHelpers": true,
+        "noEmitHelpers": false,
         "noImplicitUseStrict": true
     },
     "files": [
@@ -15,7 +15,8 @@
       "node_modules/tns-platform-declarations/android17.d.ts",
       "node_modules/tns-platform-declarations/ios.d.ts",
       "node_modules/tns-platform-declarations/org.nativescript.widgets.d.ts",
-      "spotify.ios.ts"
+      "spotify.ios.ts",
+      "spotify.android.ts"
     ],
     "compileOnSave": false
 }

@@ -3,6 +3,9 @@
     "id": "org.nativescript.demo",
     "tns-ios": {
       "version": "2.1.1"
+    },
+    "tns-android": {
+      "version": "2.1.1"
     }
   },
   "scripts": {
@@ -14,6 +17,10 @@
     "tns-core-modules": "^2.1.0"
   },
   "devDependencies": {
+    "babel-traverse": "6.11.4",
+    "babel-types": "6.11.1",
+    "babylon": "6.8.4",
+    "lazy": "1.0.11",
     "nativescript-dev-typescript": "^0.3.2",
     "shelljs": "^0.6.0",
     "tns-platform-declarations": "^2.0.0",
