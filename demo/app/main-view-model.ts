@@ -54,12 +54,12 @@ export class SpotifyDemo extends Observable {
   constructor() {
     super();
 
-    this._loader = new LoadingIndicator();
-    // init player
-    this._loader.show();
-    this._spotify = new TNSSpotifyPlayer();
-    this._spotify.initPlayer(true);
-    this.setupEvents();
+    // this._loader = new LoadingIndicator();
+    // // init player
+    // this._loader.show();
+    // this._spotify = new TNSSpotifyPlayer();
+    // this._spotify.initPlayer(true);
+    // this.setupEvents();
 
     this.playBtnTxt = `\uf144`;
     this.currentAlbumUrl = `~/assets/logo.jpg`;
