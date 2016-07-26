@@ -8,9 +8,9 @@ import * as app from "application";
 declare var com: any;
 
 
-// let AuthenticationRequest = com.spotify.sdk.android.authentication.AuthenticationRequest;
-// let AuthenticationResponse = com.spotify.sdk.android.authentication.AuthenticationResponse;
-// let AuthenticationClient = com.spotify.sdk.android.authentication.AuthenticationClient;
+let AuthenticationRequest = com.spotify.sdk.android.authentication.AuthenticationRequest;
+let AuthenticationResponse = com.spotify.sdk.android.authentication.AuthenticationResponse;
+let AuthenticationClient = com.spotify.sdk.android.authentication.AuthenticationClient;
 
 
 export class TNSSpotifyAuth {
