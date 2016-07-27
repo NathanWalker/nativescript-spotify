@@ -18,7 +18,7 @@ function pageLoaded(args) {
 
   if (isAndroid && device.sdkVersion >= "21") {
     let window = app.android.startActivity.getWindow();
-    window.setStatusBarColor(new Color("#1976D2").android);
+    window.setStatusBarColor(new Color("#000").android);
   }
 
 }

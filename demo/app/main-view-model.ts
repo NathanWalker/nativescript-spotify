@@ -39,7 +39,7 @@ export class SpotifyDemo extends Observable {
   public playlistTRActive: string;
 
   // State  
-  private _spotify: TNSSpotifyPlayer;  
+  private _spotify: TNSSpotifyPlayer;
   private _metadataVisible: boolean = false;
   private _chevronDown: string = `\uf13a`;
   private _chevronUp: string = `\uf139`;
@@ -67,11 +67,11 @@ export class SpotifyDemo extends Observable {
     this.accountInfoBtnTxt = this._userIcon;
     this.playlistNSActive = this.playlistTRActive = '#ffffff';
   }
-  
+
   public login() {
     TNSSpotifyAuth.LOGIN();
   }
-  
+
   public logout() {
     if (this.playing) {
       this.togglePlay();
@@ -80,15 +80,15 @@ export class SpotifyDemo extends Observable {
     }
     TNSSpotifyAuth.LOGOUT();
   }
-  
+
   public togglePlay(args?: EventData, trackUri?: string) {
     this._loader.show();
-    
+
     if (!this._currentTrack && !trackUri) {
       // first play if not using playlist right away is a surprise :)
       trackUri = 'spotify:track:58s6EuEYJdlb0kO7awm3Vp';
-    } 
-    
+    }
+
     // only set current track if there's a track coming in
     if (trackUri) this._currentTrack = trackUri;
 
@@ -96,19 +96,19 @@ export class SpotifyDemo extends Observable {
       this._loader.hide();
       this.set(`trackLoaded`, true);
       this.set(`playing`, isPlaying);
-      this.toggleBtn();  
+      this.toggleBtn();
       this.togglePlaylist(false);
     }, (error) => {
       this._loader.hide();
       this.set(`trackLoaded`, false);
       this.set(`playing`, false);
-      this.toggleBtn();  
+      this.toggleBtn();
       if (error === 'login') {
         this.set(`loggedIn`, false);
       }
     });
   }
-  
+
   public updateTrackInfo() {
     let metadata: TNSSpotifyTrackMetadataI = this._spotify.currentTrackMetadata();
     this.set(`albumName`, `Album: ${metadata.albumName}`);
@@ -119,7 +119,7 @@ export class SpotifyDemo extends Observable {
     this.set(`trackName`, `Track: ${metadata.trackName}`);
     this.set(`trackUri`, `Track URI: ${metadata.trackUri}`);
   }
-  
+
   public viewPlaylist(args: EventData, uri?: string) {
     if (!this._playlistOpen) {
       this._loader.show();
@@ -163,41 +163,41 @@ export class SpotifyDemo extends Observable {
       console.log(id);
       this.togglePlay(null, `spotify:track:${id}`);
     }
-    this.set(`playlistItems`, this.playlistItems);  
+    this.set(`playlistItems`, this.playlistItems);
   }
-  
+
   public toggleMetadata(args: EventData, force?: boolean) {
     let toggleOther = true;
     if (typeof force !== 'undefined') {
       toggleOther = false;
       this._metadataVisible = force;
     } else {
-      this._metadataVisible = !this._metadataVisible;  
+      this._metadataVisible = !this._metadataVisible;
     }
     let page = topmost().currentPage;
     let metadata = page.getViewById('metadata');
     metadata.animate({
       translate: { x: 30, y: this._metadataVisible ? 200 : -300 },
-      opacity:  this._metadataVisible ? .8 : 0,
+      opacity: this._metadataVisible ? .8 : 0,
       duration: 300
     });
     this.set(`metadataBtnTxt`, this._metadataVisible ? this._chevronUp : this._chevronDown);
     if (toggleOther) this.toggleAccountInfo(null, false);
   }
-  
+
   public toggleAccountInfo(args: EventData, force?: boolean) {
     let toggleOther = true;
     if (typeof force !== 'undefined') {
       toggleOther = false;
       this._accountInfoVisible = force;
     } else {
-      this._accountInfoVisible = !this._accountInfoVisible;  
+      this._accountInfoVisible = !this._accountInfoVisible;
     }
     let page = topmost().currentPage;
     let accountInfo = page.getViewById('account-info');
     accountInfo.animate({
       translate: { x: 30, y: this._accountInfoVisible ? 0 : -300 },
-      opacity:  this._accountInfoVisible ? .8 : 0,
+      opacity: this._accountInfoVisible ? .8 : 0,
       duration: 300
     });
     this.set(`accountInfoBtnTxt`, this._accountInfoVisible ? this._userIconClose : this._userIcon);
@@ -217,11 +217,11 @@ export class SpotifyDemo extends Observable {
       }
     }
   }
-  
+
   private toggleBtn() {
     this.set(`playBtnTxt`, this.playing ? '\uf28b' : '\uf144');
   }
-  
+
   private togglePlaylist(force?: boolean) {
     // EXPERIMENTATION
     // this._playlistOpen = typeof force !== 'undefined' ? force : !this._playlistOpen;
@@ -243,21 +243,21 @@ export class SpotifyDemo extends Observable {
     //   curve: AnimationCurve.easeOut
     // });
   }
-  
+
   private updateAlbumArt(url: string) {
     this.set(`currentAlbumUrl`, url);
     this.updateTrackInfo();
   }
-  
+
   private updateLogin(status: boolean) {
     this.set(`loggedIn`, status);
     this.setUsername();
   }
-  
+
   private loginCheck() {
     this._loader.show();
   }
-  
+
   private loginSuccess() {
     this.set(`loggedIn`, true);
     console.log(`loginSuccess!`);
@@ -270,12 +270,12 @@ export class SpotifyDemo extends Observable {
     console.log(`loginError!`);
     console.log(error);
     this._loader.hide();
-  }  
-  
+  }
+
   private playerReady() {
     this._loader.hide();
   }
-  
+
   private setUsername() {
     TNSSpotifyAuth.CURRENT_USER().then((user) => {
       console.log(user);
@@ -314,5 +314,5 @@ export class SpotifyDemo extends Observable {
     this._spotify.auth.events.on('authLoginError', (eventData) => {
       this.loginError(eventData.data);
     });
-  }  
+  }
 }

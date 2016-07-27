@@ -1,17 +1,15 @@
 import {Observable, EventData} from 'data/observable';
 import {TNSSpotifyConstants} from '../common';
 import {TNSSpotifyNotificationObserver} from './notification';
+import { AndroidActivityResultEventData } from "application";
 import * as dialogs from 'ui/dialogs';
 import * as app from "application";
 
-
 declare var com: any;
-
 
 let AuthenticationRequest = com.spotify.sdk.android.authentication.AuthenticationRequest;
 let AuthenticationResponse = com.spotify.sdk.android.authentication.AuthenticationResponse;
 let AuthenticationClient = com.spotify.sdk.android.authentication.AuthenticationClient;
-
 
 export class TNSSpotifyAuth {
     public static REDIRECT_URL: string;
@@ -39,17 +37,66 @@ export class TNSSpotifyAuth {
 
     public static LOGIN() {
         let builder = new AuthenticationRequest.Builder(TNSSpotifyConstants.CLIENT_ID, AuthenticationResponse.Type.TOKEN, TNSSpotifyAuth.REDIRECT_URL);
-        console.log('auth.LOGIN().builder: ' + builder);
 
-        builder.setScopes(["user-read-private", "streaming"]);
+        builder.setScopes([
+            'streaming',
+            'user-read-private',
+            'user-read-email',
+            'user-library-modify',
+            'user-library-read',
+            'playlist-read-private',
+            'playlist-modify-private',
+            'playlist-modify-public',
+            'playlist-read-collaborative']);
 
         let request = builder.build();
-        console.log('auth.LOGIN.request : ' + request);
-
         let activity = app.android.startActivity || app.android.foregroundActivity;
-        console.log('auth.LOGIN.activity: ' + activity);
 
         AuthenticationClient.openLoginActivity(activity, this.REQUEST_CODE, request);
+
+        app.android.on(app.AndroidApplication.activityResultEvent, ((args: AndroidActivityResultEventData) => {
+
+            if (args.requestCode === this.REQUEST_CODE) {
+                let response = AuthenticationClient.getResponse(args.resultCode, args.intent);
+                let responseType = response.getType();
+
+                if (responseType == AuthenticationResponse.Type.TOKEN) {
+                    let token = response.getAccessToken();
+                    console.log('token: ' + token);
+                } else if (responseType === AuthenticationResponse.Type.ERROR) {
+                    let err = response.getError();
+                    console.log('err: ' + err);
+                } else if (responseType === AuthenticationResponse.Type.CODE) {
+                    let code = response.getCode();
+                    console.log('code: ' + code);
+                } else if (responseType === AuthenticationResponse.Type.EMPTY) {
+                    console.log('EMPTY');
+                } else {
+                    console.log('response is unknown :( ');
+                }
+
+                console.log('expires: ' + response.getExpiresIn());
+                console.log('state: ' + response.getState());
+
+                // switch (response.getType()) {
+
+                //   // Response was successful and contains auth token
+                //   case AuthenticationResponse.Type.Token:
+                //     console.log('token: ' + response.getAccessToken());
+                //     break;
+
+                //   // Auth flow returned an error
+                //   case AuthenticationResponse.Type.Error:
+                //     console.log('Error getting token');
+                //     break;
+
+                //   // Most likely auth flow was cancelled
+                //   default:
+                //     break;
+                // }
+
+            }
+        }));
 
     }
 

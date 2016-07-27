@@ -1,4 +1,5 @@
 import * as application from 'application';
+import { AndroidActivityResultEventData } from "application";
 import { isAndroid, isIOS } from "platform";
 import {TNSSpotifyConstants, TNSSpotifyAuth} from 'nativescript-spotify';
 
@@ -25,12 +26,10 @@ if (isIOS) {
 
 /// Android
 if (isAndroid) {
-  console.log('app.ts: isAndroid');
-  
   TNSSpotifyConstants.CLIENT_ID = '1acac12e7fc448e188d8d70aa14249df';
   TNSSpotifyAuth.REDIRECT_URL = 'shoutoutplay://spotifylogin';
 }
 
 application.mainModule = "main-page";
 application.cssFile = "./app.css";
-application.start({ moduleName: 'main-page'});
+application.start({ moduleName: 'main-page' });
