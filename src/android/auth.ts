@@ -4,6 +4,7 @@ import {TNSSpotifyNotificationObserver} from './notification';
 import { AndroidActivityResultEventData } from "application";
 import * as dialogs from 'ui/dialogs';
 import * as app from "application";
+import * as appSettings from "application-settings";
 
 declare var com: any;
 
@@ -14,7 +15,8 @@ let AuthenticationClient = com.spotify.sdk.android.authentication.Authentication
 export class TNSSpotifyAuth {
     public static REDIRECT_URL: string;
     public static TOKEN_REFRESH_ENDPOINT: string;
-    public static SESSION: any; // SPTSession
+    public static SESSION: any;
+    public static CLEAR_COOKIES: boolean = false;
     public static AUTH_VIEW_SHOWING: boolean;
     public static PREMIUM_MSG: string = 'We are so sorry! Music streaming on mobile requires a Spotify Premium account. You can check out more at http://spotify.com. Last time we checked it was $9.99/month with the first 30 days free.';
 
@@ -35,9 +37,9 @@ export class TNSSpotifyAuth {
         this.setupNotifications();
     }
 
-    public static LOGIN() {
+    public static LOGIN(showDialog: boolean = true) {
         let builder = new AuthenticationRequest.Builder(TNSSpotifyConstants.CLIENT_ID, AuthenticationResponse.Type.TOKEN, TNSSpotifyAuth.REDIRECT_URL);
-
+        builder.setShowDialog(showDialog);
         builder.setScopes([
             'streaming',
             'user-read-private',
@@ -49,6 +51,10 @@ export class TNSSpotifyAuth {
             'playlist-modify-public',
             'playlist-read-collaborative']);
 
+        if (TNSSpotifyAuth.CLEAR_COOKIES) {
+            AuthenticationClient.clearCookies(app.android.currentContext);
+        }
+
         let request = builder.build();
         let activity = app.android.startActivity || app.android.foregroundActivity;
 
@@ -59,42 +65,26 @@ export class TNSSpotifyAuth {
             if (args.requestCode === this.REQUEST_CODE) {
                 let response = AuthenticationClient.getResponse(args.resultCode, args.intent);
                 let responseType = response.getType();
+                // console.log('expires: ' + response.getExpiresIn());
 
                 if (responseType == AuthenticationResponse.Type.TOKEN) {
                     let token = response.getAccessToken();
-                    console.log('token: ' + token);
-                } else if (responseType === AuthenticationResponse.Type.ERROR) {
+                    TNSSpotifyAuth.SAVE_SESSION(token);
+                }
+                else if (responseType === AuthenticationResponse.Type.ERROR) {
                     let err = response.getError();
                     console.log('err: ' + err);
-                } else if (responseType === AuthenticationResponse.Type.CODE) {
+                }
+                else if (responseType === AuthenticationResponse.Type.CODE) {
                     let code = response.getCode();
                     console.log('code: ' + code);
-                } else if (responseType === AuthenticationResponse.Type.EMPTY) {
+                }
+                else if (responseType === AuthenticationResponse.Type.EMPTY) {
                     console.log('EMPTY');
-                } else {
+                }
+                else {
                     console.log('response is unknown :( ');
                 }
-
-                console.log('expires: ' + response.getExpiresIn());
-                console.log('state: ' + response.getState());
-
-                // switch (response.getType()) {
-
-                //   // Response was successful and contains auth token
-                //   case AuthenticationResponse.Type.Token:
-                //     console.log('token: ' + response.getAccessToken());
-                //     break;
-
-                //   // Auth flow returned an error
-                //   case AuthenticationResponse.Type.Error:
-                //     console.log('Error getting token');
-                //     break;
-
-                //   // Most likely auth flow was cancelled
-                //   default:
-                //     break;
-                // }
-
             }
         }));
 
@@ -107,53 +97,86 @@ export class TNSSpotifyAuth {
 
     public static HANDLE_AUTH_CALLBACK(url) {
         // Ask SPTAuth if the URL given is a Spotify authentication callback
-
-
     }
 
     public static LOGIN_WITH_SESSION(session) {
-
 
     }
 
     public static VERIFY_SESSION(session?: any): Promise<any> {
         return new Promise((resolve, reject) => {
+            console.log(`verifying Spotify session...`);
+            // when verifying existing via argument, may need to log user out with notice
+            let checkExisting = true;
+            if (!session) {
+                // just initializing
+                checkExisting = false;
+                let sessionObj = TNSSpotifyAuth.GET_STORED_SESSION();
+                if (sessionObj) {
+                    // check if refresh needed
+                    // let sessionData = sessionObj; // NSData
+                    session = sessionObj;
+                }
+            }
 
+            let showErrorAndLogout = () => {
+                console.log(`showErrorAndLogout`)
+                if (checkExisting) {
+                    console.log(`error renewing, calling TNSSpotifyAuth.LOGOUT()`);
+                    TNSSpotifyAuth.LOGOUT();
+                    setTimeout(() => {
+                        dialogs.alert('Please re-login.');
+                    });
+                }
+                reject();
+            };
 
+            if (session) {
+                if (!session.isValid()) {
+                    console.log('NOT VALID.');
+                    // renew session
+                    TNSSpotifyAuth.RENEW_SESSION(session).then(resolve, () => {
+                        showErrorAndLogout();
+                    });
+                } else {
+                    console.log('VALID.');
+                    TNSSpotifyAuth.SESSION = session;
+                    resolve();
+                }
+            } else {
+                showErrorAndLogout();
+            }
         });
     }
 
     public static SAVE_SESSION(session): void {
-
-
+        console.log('SAVE_SESSION: ' + session);
+        TNSSpotifyAuth.SESSION = session;
+        appSettings.setString(TNSSpotifyConstants.KEY_STORE_SESSION, session);
     }
 
     public static GET_STORED_SESSION(): any {
         // https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTSession.html
-
+        console.log('GET_STORED_SESSION: ' + TNSSpotifyAuth.SESSION);
+        return appSettings.getString(TNSSpotifyConstants.KEY_STORE_SESSION);
     }
 
     public static RENEW_SESSION(session: any): Promise<any> {
         return new Promise((resolve, reject) => {
             console.log(`trying to renew Spotify session...`);
-
-
+            TNSSpotifyAuth.LOGIN(false);
+            resolve();
         });
     }
 
     public static CURRENT_USER(): Promise<any> {
-        // https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTUser.html
-        return new Promise((resolve, reject) => {
-
-
-        });
+        console.log('DONT SEE ANDROID EQUIVALENT OF THIS');
+        // return new Promise((resolve, reject) => { });
     }
 
     public static CHECK_PREMIUM(): Promise<any> {
-        return new Promise((resolve, reject) => {
-
-
-        });
+        console.log('DONT SEE ANDROID EQUIVALENT OF THIS');
+        // return new Promise((resolve, reject) => { });
     }
 
     private setupNotifications() {
