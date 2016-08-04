@@ -111,6 +111,7 @@ export class TNSSpotifyAuth extends NSObject {
   }
 
   public static LOGIN_WITH_SESSION(session) {
+    TNSSpotifyAuth.CLEAR_COOKIES = false;
     TNSSpotifyAuth.SAVE_SESSION(session);
     NSNotificationCenter.defaultCenter().postNotificationNameObject(TNSSpotifyConstants.NOTIFY_LOGIN_SUCCESS, null);
   }  
@@ -223,6 +224,7 @@ export class TNSSpotifyAuth extends NSObject {
           console.log(`User Product: ${user.product}`);
           if (user.product == 0 || user.product == 3) {
             dialogs.alert(TNSSpotifyAuth.PREMIUM_MSG);
+            TNSSpotifyAuth.CLEAR_COOKIES = true;
             TNSSpotifyAuth.LOGOUT();
             reject();
           } else {
