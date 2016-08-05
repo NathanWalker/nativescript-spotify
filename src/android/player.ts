@@ -8,6 +8,7 @@ declare var com: any;
 let Config = com.spotify.sdk.android.player.Config
 let Spotify = com.spotify.sdk.android.player.Spotify;
 let Player = com.spotify.sdk.android.player.Player;
+let Builder = com.spotify.sdk.android.player.Player.Builder;
 
 export class TNSSpotifyPlayer {
   public player: any; // SPTAudioStreamingController
@@ -174,22 +175,29 @@ export class TNSSpotifyPlayer {
   private checkPlayer(): Promise<boolean> {
     return new Promise((resolve, reject) => {
       if (!this._started) {
+        
+          let playerConfig: any = new Config(app.android.currentContext, TNSSpotifyAuth.SESSION, TNSSpotifyConstants.CLIENT_ID);
+          let builder = new Builder(playerConfig);  
+          // let observer = new Player.InitializationObserver();
+          this.player = builder.build();
 
-        let activity = app.android.startActivity || app.android.foregroundActivity;          
-        let playerConfig: any = new Config(activity, TNSSpotifyAuth.SESSION, TNSSpotifyConstants.CLIENT_ID);
-        this.player = Spotify.getPlayer(playerConfig, activity, Player.InitializationObserver().extend({
-          onInitialized: (player: any) => {
-            console.log(`player initialized`, activity);
-            this._started = true;
-            this.player.addConnectionStateCallback(activity);
-            this.player.addPlayerNotificationCallback(activity);
-            resolve();
-          },
-          onError: (throwable: any) => {
-            console.log("MainActivity", "Could not initialize player: " + throwable.getMessage());
-            reject();
-          }
-        }));       
+          // this.player = Spotify.getPlayer(playerConfig, this, Player.InitializationObserver().extend({
+          // this.player = builder.build(new Player.InitializationObserver().extend({  
+          //   onInitialized: (player: any) => {
+          //     let activity = app.android.startActivity || app.android.foregroundActivity;    
+          //     console.log(`player initialized`, player);
+          //     this._started = true;
+          //     this.player.addConnectionStateCallback(activity);
+          //     this.player.addPlayerNotificationCallback(activity);
+          //     resolve();
+          //   },
+          //   onError: (throwable: any) => {
+          //     console.log("MainActivity", "Could not initialize player: " + throwable.getMessage());
+          //     reject();
+          //   }
+          // }));   
+          console.log('after player');  
+          resolve();  
 
         // let errorRef = new interop.Reference();
         // this.player = SPTAudioStreamingController.sharedInstance();
