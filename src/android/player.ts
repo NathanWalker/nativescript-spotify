@@ -8,6 +8,7 @@ declare var com: any;
 let Config = com.spotify.sdk.android.player.Config
 let Spotify = com.spotify.sdk.android.player.Spotify;
 let Player = com.spotify.sdk.android.player.Player;
+let PlayerNotificationCallback = com.spotify.sdk.android.player.PlayerNotificationCallback;
 let Builder = com.spotify.sdk.android.player.Player.Builder;
 
 export class TNSSpotifyPlayer {
@@ -34,7 +35,7 @@ export class TNSSpotifyPlayer {
   private _poppedQueue: EventData;
 
   // streaming delegate events
-  private _temporaryConnectionError: EventData;  
+  private _temporaryConnectionError: EventData;
   private _streamError: EventData;
   private _receivedMessage: EventData;
   private _streamDisconnected: EventData;
@@ -48,7 +49,7 @@ export class TNSSpotifyPlayer {
   private _playerLoggedIn: boolean = false;
   private _playing: boolean = false;
   private _playerHandler: any;
-  
+
   public initPlayer(emitEvents?: boolean) {
 
     // setup auth
@@ -68,11 +69,11 @@ export class TNSSpotifyPlayer {
       this.playerReady();
     });
   }
-  
+
   public isLoggedIn() {
     return this._loggedIn;
   }
-  
+
   public togglePlay(track?: string, force?: boolean): Promise<any> {
     return new Promise((resolve, reject) => {
       if (track && (track !== this._loadedTrack)) {
@@ -91,17 +92,17 @@ export class TNSSpotifyPlayer {
       }
     });
   }
-  
+
   public isPlaying(): boolean {
-      //https://developer.spotify.com/android-sdk-docs/player/com/spotify/sdk/android/player/PlayerStateCallback.html ?
-      // this.player.getPlayerState()
+    //https://developer.spotify.com/android-sdk-docs/player/com/spotify/sdk/android/player/PlayerStateCallback.html ?
+    // this.player.getPlayerState()
     return this._playing;
   }
-  
+
   public loadedTrack(): string {
     return this._loadedTrack;
   }
-  
+
   public currentTrackMetadata(): TNSSpotifyTrackMetadataI {
     if (this.player && this.player.currentTrackMetadata) {
       let metadata: TNSSpotifyTrackMetadataI = {
@@ -118,29 +119,29 @@ export class TNSSpotifyPlayer {
       return {};
     }
   }
-  
+
   // Delegate methods
   public audioStreamingDidChangePlaybackStatus(controller: any, playing: boolean) {
     console.log(`DidChangePlaybackStatus: ${playing}`);
     if (this.events) {
       this._changedPlaybackStatus.data.playing = playing;
-      this.events.notify(this._changedPlaybackStatus);  
+      this.events.notify(this._changedPlaybackStatus);
     }
   }
-  
+
   private play(track: string): Promise<any> {
     return new Promise((resolve, reject) => {
       this.checkPlayer().then(() => {
-        if (!this._playerLoggedIn) { 
+        if (!this._playerLoggedIn) {
           this._playerLoggedIn = true;
-        } 
+        }
         this.playUri(track, resolve, reject);
       }, () => {
         reject('login');
       });
     });
   }
-  
+
   private playUri(track: string, resolve: Function, reject: Function) {
     console.log(`playUri`, this.player);
     this.player.play(track);
@@ -148,44 +149,60 @@ export class TNSSpotifyPlayer {
     this._playing = true;
     resolve();
   }
-  
+
   private checkPlayer(): Promise<boolean> {
     return new Promise((resolve, reject) => {
       if (!this._started) {
-        
-        let activity = app.android.startActivity || app.android.foregroundActivity;  
-          let playerConfig: any = new Config(activity, TNSSpotifyAuth.SESSION, TNSSpotifyConstants.CLIENT_ID);
-          let builder = new Builder(playerConfig);  
 
-          let observer = new Player.InitializationObserver({
-              onError: (throwable) => {
-                  let msg = throwable.getMessage();
-                  console.log("MainActivity", "Could not initialize player: " + msg);
-                  reject(msg);  
-              },
-              onInitialized: (player) => {      
-                console.log(`player initialized`, player);
-                this._started = true;
-                  
-                // this.player.addConnectionStateCallback(activity);
-                // this.player.addPlayerNotificationCallback(activity);
+        let activity = app.android.startActivity || app.android.foregroundActivity;
+        let playerConfig: any = new Config(activity, TNSSpotifyAuth.SESSION, TNSSpotifyConstants.CLIENT_ID);
+        let builder = new Builder(playerConfig);
 
-                // check if user is non-premium
-                // TNSSpotifyAuth.CHECK_PREMIUM().then(resolve, reject);
-                resolve();
-              }
-          });
+        let observer = new Player.InitializationObserver({
+          onError: (throwable) => {
+            let msg = throwable.getMessage();
+            console.log("MainActivity", "Could not initialize player: " + msg);
+            reject(msg);
+          },
+          onInitialized: (player) => {
+            console.log(`player initialized`, player);
+            this._started = true;
 
-          // this._playerHandler = new android.os.Handler();
-          // this.player = builder.setCallbackHandler(this._playerHandler).build();
-          this.player = builder.build(observer);
+            // this.player.addConnectionStateCallback(activity);
+            // this.player.addPlayerNotificationCallback(activity);
+
+            // check if user is non-premium
+            // TNSSpotifyAuth.CHECK_PREMIUM().then(resolve, reject);
+            resolve();
+          }
+        });
+
+        // this._playerHandler = new android.os.Handler();
+        // this.player = builder.setCallbackHandler(this._playerHandler).build();
+        this.player = builder.build(observer);
+
+
+        this.player.addPlayerNotificationCallback(new PlayerNotificationCallback({
+
+          onPlaybackEvent: (eventType, playerState) => {
+            console.log('EVENT TYPE: ' + eventType);
+            console.log('PLAYER STATE: ' + playerState);
+          },
+
+          onPlaybackError: (errorType, errorDetails) => {
+            console.log('ERROR TYPE: ' + errorType);
+            console.log('ERROR DETAILS: ' + errorDetails);
+          }
+
+        }));
+
 
       } else {
         resolve();
       }
     });
   }
-  
+
   private updateCoverArt(albumUri: string): Promise<any> {
     return new Promise((resolve, reject) => {
       resolve();
@@ -196,7 +213,7 @@ export class TNSSpotifyPlayer {
       //     reject();
       //     return;
       //   }
-        
+
       //   // albumObj: SPTAlbum = https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAlbum.html
 
       //   this._currentAlbumImageUrl = albumObj.largestCover.imageURL.absoluteString;
@@ -208,7 +225,7 @@ export class TNSSpotifyPlayer {
       // });
     });
   }
-  
+
   private isLoginError(desc: string): boolean {
     if (desc.indexOf('invalid credentials') > -1 || desc.indexOf('NULL') > -1) {
       return true;
@@ -216,12 +233,12 @@ export class TNSSpotifyPlayer {
       return false;
     }
   }
-  
+
   private loginError() {
     this.setLoggedIn(false);
     Utils.alert('You need to login to renew your session.');
   }
-  
+
   private setLoggedIn(value: boolean) {
     this._loggedIn = value;
     if (!value) {
@@ -231,23 +248,23 @@ export class TNSSpotifyPlayer {
         console.log(`TODO: player dispose()`);
         this.player.logout();
       }
-      
+
     }
   }
-  
+
   private playerReady(): void {
     if (this.events) {
       this._playerReady.data.loggedIn = this._loggedIn;
-      this.events.notify(this._playerReady);  
+      this.events.notify(this._playerReady);
     }
   }
-  
+
   private setupEvents() {
     // auth state
     this.auth.events.on('authLoginChange', (eventData: any) => {
       console.log(`this.auth.events.on('authLoginChange'`, eventData.data.status);
       this.setLoggedIn(eventData.data.status);
-    });      
+    });
 
     // // player events    
     this.events = new Observable();
@@ -351,5 +368,5 @@ export class TNSSpotifyPlayer {
     this._streamDisconnected = {
       eventName: 'streamDisconnected'
     };
-  } 
+  }
 }
