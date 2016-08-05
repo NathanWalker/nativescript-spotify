@@ -2,6 +2,7 @@ import {Observable, EventData} from 'data/observable';
 import {Page} from 'ui/page';
 import {topmost} from 'ui/frame';
 import {AnimationCurve} from 'ui/enums';
+import {isIOS} from 'platform';
 import {LoadingIndicator} from 'nativescript-loading-indicator';
 import {
   TNSSpotifyConstants,
@@ -54,12 +55,12 @@ export class SpotifyDemo extends Observable {
   constructor() {
     super();
 
-    // this._loader = new LoadingIndicator();
-    // // init player
-    // this._loader.show();
-    // this._spotify = new TNSSpotifyPlayer();
-    // this._spotify.initPlayer(true);
-    // this.setupEvents();
+    this._loader = new LoadingIndicator();
+    // init player
+    this._loader.show();
+    this._spotify = new TNSSpotifyPlayer();
+    this._spotify.initPlayer(true);
+    this.setupEvents();
 
     this.playBtnTxt = `\uf144`;
     this.currentAlbumUrl = `~/assets/logo.jpg`;
@@ -278,15 +279,19 @@ export class SpotifyDemo extends Observable {
 
   private setUsername() {
     TNSSpotifyAuth.CURRENT_USER().then((user) => {
-      console.log(user);
-      this.set(`accountName`, user.displayName);
+      console.log(`current_user`, user);
+      if (user) {
+        this.set(`accountName`, user.displayName);
 
-      // test out playlist results
-      TNSSpotifyPlaylist.MINE().then((result: any) => {
-        console.log('fetch all playlists:');
-        console.log(result.playlists);
-        console.log(result.playlists.length);
-      });
+        if (isIOS) {
+          // test out playlist results
+          TNSSpotifyPlaylist.MINE().then((result: any) => {
+            console.log('fetch all playlists:');
+            console.log(result.playlists);
+            console.log(result.playlists.length);
+          });
+        }
+      }
     }, () => {
       this.set(`accountName`, '');
     })

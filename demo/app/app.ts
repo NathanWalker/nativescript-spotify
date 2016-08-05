@@ -3,17 +3,18 @@ import { AndroidActivityResultEventData } from "application";
 import { isAndroid, isIOS } from "platform";
 import {TNSSpotifyConstants, TNSSpotifyAuth} from 'nativescript-spotify';
 
+// Setup spotify dev app
+// TNSSpotifyConstants.CLIENT_ID = 'your spotify client id here';
+// TNSSpotifyAuth.REDIRECT_URL = 'tnsspotify://spotifylogin';
+TNSSpotifyConstants.CLIENT_ID = '1acac12e7fc448e188d8d70aa14249df';
+TNSSpotifyAuth.REDIRECT_URL = 'shoutoutplay://spotifylogin';
+
 /// iOS
 if (isIOS) {
   class MyDelegate extends UIResponder {
     public static ObjCProtocols = [UIApplicationDelegate];
 
     public applicationDidFinishLaunchingWithOptions(application: UIApplication, launchOptions: NSDictionary): boolean {
-
-      // TNSSpotifyConstants.CLIENT_ID = 'your spotify client id here';
-      // TNSSpotifyAuth.REDIRECT_URL = 'tnsspotify://spotifylogin';
-      TNSSpotifyConstants.CLIENT_ID = '1acac12e7fc448e188d8d70aa14249df';
-      TNSSpotifyAuth.REDIRECT_URL = 'shoutoutplay://spotifylogin';
       return true;
     }
 
@@ -26,8 +27,15 @@ if (isIOS) {
 
 /// Android
 if (isAndroid) {
-  TNSSpotifyConstants.CLIENT_ID = '1acac12e7fc448e188d8d70aa14249df';
-  TNSSpotifyAuth.REDIRECT_URL = 'shoutoutplay://spotifylogin';
+  // TNSSpotifyConstants.CLIENT_ID = '1acac12e7fc448e188d8d70aa14249df';
+  // TNSSpotifyAuth.REDIRECT_URL = 'shoutoutplay://spotifylogin';
+
+  application.onLaunch = function(intent) {
+    // hook the onActivityCreated callback upon application launching
+    application.android.onActivityCreated = function (activity: any) {
+      TNSSpotifyAuth.MAIN_ACTIVITY = activity;
+    };
+  };
 }
 
 application.mainModule = "main-page";
