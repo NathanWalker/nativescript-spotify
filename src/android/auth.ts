@@ -24,7 +24,6 @@ export class TNSSpotifyAuth {
     // Request code that will be used to verify if the result comes from correct activity
     // Can be any integer
     public static REQUEST_CODE = 1337;
-    public static MAIN_ACTIVITY: any;
 
     // events
     public events: Observable;

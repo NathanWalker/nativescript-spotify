@@ -29,13 +29,6 @@ if (isIOS) {
 if (isAndroid) {
   // TNSSpotifyConstants.CLIENT_ID = '1acac12e7fc448e188d8d70aa14249df';
   // TNSSpotifyAuth.REDIRECT_URL = 'shoutoutplay://spotifylogin';
-
-  application.onLaunch = function(intent) {
-    // hook the onActivityCreated callback upon application launching
-    application.android.onActivityCreated = function (activity: any) {
-      TNSSpotifyAuth.MAIN_ACTIVITY = activity;
-    };
-  };
 }
 
 application.mainModule = "main-page";
