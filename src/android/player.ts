@@ -8,6 +8,8 @@ declare var com: any;
 let Config = com.spotify.sdk.android.player.Config
 let Spotify = com.spotify.sdk.android.player.Spotify;
 let Player = com.spotify.sdk.android.player.Player;
+let PlayerState = com.spotify.sdk.android.player.PlayerState;
+let PlayerStateCallback = com.spotify.sdk.android.player.PlayerStateCallback;
 let PlayerNotificationCallback = com.spotify.sdk.android.player.PlayerNotificationCallback;
 let Builder = com.spotify.sdk.android.player.Player.Builder;
 
@@ -71,7 +73,7 @@ export class TNSSpotifyPlayer {
   }
 
   public isLoggedIn() {
-    return this._loggedIn;
+    return this.player.isLoggedIn();
   }
 
   public togglePlay(track?: string, force?: boolean): Promise<any> {
@@ -94,10 +96,59 @@ export class TNSSpotifyPlayer {
   }
 
   public isPlaying(): boolean {
-    //https://developer.spotify.com/android-sdk-docs/player/com/spotify/sdk/android/player/PlayerStateCallback.html ?
-    // this.player.getPlayerState()
     return this._playing;
   }
+
+  /**
+   * Fetch the current player state from native SDK. 
+   * This method will be executed on the player thread and the result is posted back to the caller's original thread.
+   */
+  public getPlayerState() {
+    return new Promise((resolve, reject) => {
+      try {
+        this.player.getPlayerState(new PlayerStateCallback({
+          onPlayerState: (playerState) => {
+            // create an object to resolve with
+            let resp = {
+              activeDevice: playerState.activeDevice,
+              duration: playerState.durationInMs,
+              playing: playerState.playing,
+              position: playerState.positionInMs,
+              repeating: playerState.repeating,
+              shuffling: playerState.shuffling,
+              trackUri: playerState.trackUri
+            }
+            resolve(resp);
+          }
+        }));
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+
+  /**
+   * Enable or disable shuffling.
+   */
+  public setShuffle(enabled: boolean) {
+    this.player.setShuffle(enabled);
+  }
+
+  /**
+   * Enable or disable repeat.
+   */
+  public setRepeat(enabled: boolean) {
+    this.player.setRepeat(enabled);
+  }
+
+  /**
+   * Jump to a given position in the current track.
+   */
+  public seekToPosition(position: number) {
+    this.player.seekToPosition(position);
+  }
+
 
   public loadedTrack(): string {
     return this._loadedTrack;
@@ -202,6 +253,7 @@ export class TNSSpotifyPlayer {
       }
     });
   }
+
 
   private updateCoverArt(albumUri: string): Promise<any> {
     return new Promise((resolve, reject) => {

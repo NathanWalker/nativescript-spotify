@@ -2,7 +2,7 @@ import {Observable, EventData} from 'data/observable';
 import {Page} from 'ui/page';
 import {topmost} from 'ui/frame';
 import {AnimationCurve} from 'ui/enums';
-import {isIOS} from 'platform';
+import {isIOS, isAndroid} from 'platform';
 import {LoadingIndicator} from 'nativescript-loading-indicator';
 import {
   TNSSpotifyConstants,
@@ -142,6 +142,22 @@ export class SpotifyDemo extends Observable {
       this.togglePlaylist();
     }
   }
+
+
+
+
+  public getPlayerState() {
+    try {
+      this._spotify.getPlayerState().then((resp) => {
+        console.log('PLAYER STATE: ' + JSON.stringify(resp));
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+
+
 
   public viewThoughtram(args: EventData) {
     this.viewPlaylist(args, 'spotify:user:pascalprecht:playlist:6tTtJJTxkrp9Qnz5afZzpz');
