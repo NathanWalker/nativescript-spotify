@@ -80,13 +80,11 @@ export class TNSSpotifyPlayer {
         this.play(track).then(resolve, reject);
       } else if (this.player) {
         // toggling
-        let playState = typeof force !== 'undefined' ? force : !this._playing;
+        this._playing = typeof force !== 'undefined' ? force : !this._playing;
 
-        if (playState) {
-          this._playing = true;
+        if (this._playing) {
           this.player.resume();
         } else {
-          this._playing = false;
           this.player.pause();
         }
         resolve(this._playing);
@@ -95,6 +93,8 @@ export class TNSSpotifyPlayer {
   }
   
   public isPlaying(): boolean {
+      //https://developer.spotify.com/android-sdk-docs/player/com/spotify/sdk/android/player/PlayerStateCallback.html ?
+      // this.player.getPlayerState()
     return this._playing;
   }
   
@@ -156,65 +156,29 @@ export class TNSSpotifyPlayer {
         let activity = app.android.startActivity || app.android.foregroundActivity;  
           let playerConfig: any = new Config(activity, TNSSpotifyAuth.SESSION, TNSSpotifyConstants.CLIENT_ID);
           let builder = new Builder(playerConfig);  
-          // let observer = new Player.InitializationObserver();
-          // this._playerHandler = new android.os.Handler();
-          // this.player = builder.setCallbackHandler(this._playerHandler).build();
 
           let observer = new Player.InitializationObserver({
               onError: (throwable) => {
-                console.log("MainActivity", "Could not initialize player: " + throwable.getMessage());
+                  let msg = throwable.getMessage();
+                  console.log("MainActivity", "Could not initialize player: " + msg);
+                  reject(msg);  
               },
               onInitialized: (player) => {      
                 console.log(`player initialized`, player);
                 this._started = true;
+                  
+                // this.player.addConnectionStateCallback(activity);
+                // this.player.addPlayerNotificationCallback(activity);
+
+                // check if user is non-premium
+                // TNSSpotifyAuth.CHECK_PREMIUM().then(resolve, reject);
                 resolve();
               }
           });
+
+          // this._playerHandler = new android.os.Handler();
+          // this.player = builder.setCallbackHandler(this._playerHandler).build();
           this.player = builder.build(observer);
-          // this._started = true;
-
-          // this.player = Spotify.getPlayer(playerConfig, this, Player.InitializationObserver().extend({
-          // this.player = builder.build(new Player.InitializationObserver().extend({  
-          //   onInitialized: (player: any) => {
-          //     let activity = app.android.startActivity || app.android.foregroundActivity;    
-          //     console.log(`player initialized`, player);
-          //     this._started = true;
-          //     this.player.addConnectionStateCallback(activity);
-          //     this.player.addPlayerNotificationCallback(activity);
-          //     resolve();
-          //   },
-          //   onError: (throwable: any) => {
-          //     console.log("MainActivity", "Could not initialize player: " + throwable.getMessage());
-          //     reject();
-          //   }
-          // }));   
-          console.log('after player');  
-          // resolve();  
-
-        // let errorRef = new interop.Reference();
-        // this.player = SPTAudioStreamingController.sharedInstance();
-        // if (this.player.startWithClientIdError(TNSSpotifyConstants.CLIENT_ID, errorRef)) {
-        //   this._started = true;
-        //   this.player.delegate = this;
-        //   this.player.playbackDelegate = this;
-        //   this.player.diskCache = SPTDiskCache.alloc().initWithCapacity(1024 * 1024 * 64);
-          
-        //   if (errorRef) {
-        //     console.log(errorRef.description);
-        //     printErrorRef(errorRef, false);
-        //   } 
-        //   // check if user is non-premium
-        //   TNSSpotifyAuth.CHECK_PREMIUM().then(resolve, reject);
-        // } else {
-        //   this._started = false;
-        //   if (errorRef) {
-        //     printErrorRef(errorRef, true);
-        //   }
-        //   // check if user is non-premium
-        //   // since this is real player error, reject both
-        //   // but it will at least alert user if they are non-premium still
-        //   TNSSpotifyAuth.CHECK_PREMIUM().then(reject, reject);
-        // }
 
       } else {
         resolve();
@@ -264,14 +228,8 @@ export class TNSSpotifyPlayer {
       this._playerLoggedIn = false;
       if (this._started) {
         this._started = false;
-        console.log(`player dispose()`);
+        console.log(`TODO: player dispose()`);
         this.player.logout();
-        // setTimeout(() => {
-        //   // if delegate method did not get called, fallback to manual
-        //   if (this.player) {
-        //     this.audioStreamingDidLogout(null);
-        //   }
-        // }, 1000);
       }
       
     }
