@@ -11,7 +11,7 @@ export class TNSSpotifySearch {
   public static QUERY(query: string, queryType: string, offset: number = 0): Promise<any> {
     // query: search term
     // queryType: album, artist, playlist, and track
-    query = query && query.length ? query.replace(' ', '+') : '';
+    query = query && query.length ? query.replace(/ /ig, '+') : '';
 
     return new Promise((resolve, reject) => {  
       if (query.length === 0) {

@@ -47,6 +47,7 @@ export class TNSSpotifyPlayer {
   private _loggedIn: boolean = false;
   private _playerLoggedIn: boolean = false;
   private _playing: boolean = false;
+  private _playerHandler: any;
   
   public initPlayer(emitEvents?: boolean) {
 
@@ -88,31 +89,7 @@ export class TNSSpotifyPlayer {
           this._playing = false;
           this.player.pause();
         }
-        
-
-        // this.player.setIsPlayingCallback(playState, (error) => {
-        //   if (error != null) {
-        //     console.log(`*** Pause/Resume playback got error:`);
-        //     console.log(error);
-            
-        //     // try to verify/renew the session
-        //     TNSSpotifyAuth.VERIFY_SESSION(TNSSpotifyAuth.SESSION).then(() => {
-        //       let origResolve = resolve;
-        //       this.togglePlay(track, force).then((isPlaying: boolean) => {
-        //         origResolve(isPlaying);
-        //       });
-        //     }, () => {
-        //       if (this.isLoginError(error.localizedDescription)) {
-        //         this.loginError();
-        //         reject('login');
-        //       } else {
-        //         reject(false);
-        //       }
-        //     });
-        //     return;
-        //   }
-        //   resolve(this.player.isPlaying);
-        // });
+        resolve(this._playing);
       }
     });
   }
@@ -126,7 +103,6 @@ export class TNSSpotifyPlayer {
   }
   
   public currentTrackMetadata(): TNSSpotifyTrackMetadataI {
-    // https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAudioStreamingController.html#//api/name/currentTrackMetadata
     if (this.player && this.player.currentTrackMetadata) {
       let metadata: TNSSpotifyTrackMetadataI = {
         albumName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumName'),
@@ -168,6 +144,7 @@ export class TNSSpotifyPlayer {
   private playUri(track: string, resolve: Function, reject: Function) {
     console.log(`playUri`, this.player);
     this.player.play(track);
+    this._loadedTrack = track;
     this._playing = true;
     resolve();
   }
@@ -176,10 +153,25 @@ export class TNSSpotifyPlayer {
     return new Promise((resolve, reject) => {
       if (!this._started) {
         
-          let playerConfig: any = new Config(app.android.currentContext, TNSSpotifyAuth.SESSION, TNSSpotifyConstants.CLIENT_ID);
+        let activity = app.android.startActivity || app.android.foregroundActivity;  
+          let playerConfig: any = new Config(activity, TNSSpotifyAuth.SESSION, TNSSpotifyConstants.CLIENT_ID);
           let builder = new Builder(playerConfig);  
           // let observer = new Player.InitializationObserver();
-          this.player = builder.build();
+          // this._playerHandler = new android.os.Handler();
+          // this.player = builder.setCallbackHandler(this._playerHandler).build();
+
+          let observer = new Player.InitializationObserver({
+              onError: (throwable) => {
+                console.log("MainActivity", "Could not initialize player: " + throwable.getMessage());
+              },
+              onInitialized: (player) => {      
+                console.log(`player initialized`, player);
+                this._started = true;
+                resolve();
+              }
+          });
+          this.player = builder.build(observer);
+          // this._started = true;
 
           // this.player = Spotify.getPlayer(playerConfig, this, Player.InitializationObserver().extend({
           // this.player = builder.build(new Player.InitializationObserver().extend({  
@@ -197,7 +189,7 @@ export class TNSSpotifyPlayer {
           //   }
           // }));   
           console.log('after player');  
-          resolve();  
+          // resolve();  
 
         // let errorRef = new interop.Reference();
         // this.player = SPTAudioStreamingController.sharedInstance();
