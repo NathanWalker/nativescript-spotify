@@ -7,7 +7,7 @@
         "sourceMap": true,
         "declaration": true,
         "noEmitOnError": false,
-        "noEmitHelpers": false,
+        "noEmitHelpers": true,
         "noImplicitUseStrict": true
     },
     "files": [

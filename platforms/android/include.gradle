@@ -6,6 +6,11 @@ android {
     }
 }
 
+repositories {
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+}
+
 dependencies {
       def supportVer = "22.2.0";
 
@@ -14,4 +19,5 @@ dependencies {
       }
       
     compile "com.android.support:appcompat-v7:$supportVer"
+    compile 'com.github.kaaes:spotify-web-api-android:0.4.1'
 }
