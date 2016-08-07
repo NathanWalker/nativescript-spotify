@@ -3,6 +3,7 @@ import {TNSTrack} from '../common';
 
 declare var kaaes: any;
 let SpotifyApi: any = kaaes.spotify.webapi.android.SpotifyApi;
+let SpotifyCallback: any = kaaes.spotify.webapi.android.SpotifyCallback;
 
 export class TNSSpotifySearch {
   public static CURRENT_LIST: any;
@@ -12,10 +13,24 @@ export class TNSSpotifySearch {
   public static QUERY(query: string, queryType: string, offset: number = 0): Promise<any> {
 
     if (!TNSSpotifySearch.apiInstance) {
+      console.log(`TNSSpotifySearch.apiInstance`);
+      console.log(`SpotifyApi`);
+      console.log(SpotifyApi);
       TNSSpotifySearch.apiInstance = new SpotifyApi();
+      console.log(TNSSpotifySearch.apiInstance);
     }
+    for (let key in TNSSpotifySearch.apiInstance) {
+      console.log(key);
+    }
+    console.log('access token:');
+    console.log(TNSSpotifyAuth.SESSION);
     TNSSpotifySearch.apiInstance.setAccessToken(TNSSpotifyAuth.SESSION);
-    let api = TNSSpotifySearch.apiInstance.getService();
+    console.log(`just set token.`);
+    console.log(TNSSpotifySearch.apiInstance.getService);
+    console.log(TNSSpotifySearch.apiInstance.getService());
+    let serviceApi = TNSSpotifySearch.apiInstance.getService();
+    console.log(`serviceApi:`);
+    console.log(serviceApi);
 
     // query: search term
     // queryType: album, artist, playlist, and track
@@ -72,16 +87,21 @@ export class TNSSpotifySearch {
           
         } else {
 
-          let trackPager = api.searchTracks(query);
-          console.log('trackPager...');
-          console.log(trackPager);
-          for (let key in trackPager) {
-            console.log(key);
-          }
-          if (trackPager) {
-            console.log(trackPager.tracks);
-            processResults(trackPager.tracks);   
-          }
+          serviceApi.searchTracks(query, new SpotifyCallback({
+            success: (trackPager, res) => {
+              console.log('success! trackPager...');
+              console.log(trackPager);
+              for (let key in trackPager) {
+                console.log(key);
+              }
+              processResults(trackPager.tracks);
+            },
+            failure: (err) => {
+              console.log('search error...');
+              console.log(err);
+              reject();
+            }
+          }));
               
         }
 
