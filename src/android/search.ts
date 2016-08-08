@@ -1,9 +1,18 @@
 import {TNSSpotifyAuth} from './auth';
 import {TNSTrack} from '../common';
 
-declare var kaaes: any;
+declare var kaaes, retrofit;
 let SpotifyApi: any = kaaes.spotify.webapi.android.SpotifyApi;
+let SpotifyService: any = kaaes.spotify.webapi.android.SpotifyService;
 let SpotifyCallback: any = kaaes.spotify.webapi.android.SpotifyCallback;
+let Executors: any = java.util.concurrent.Executors;
+let RequestInterceptor:any = retrofit.RequestInterceptor;
+let RestAdapter: any = retrofit.RestAdapter;
+let MainThreadExecutor: any = retrofit.android.MainThreadExecutor;
+
+class SpotifyServiceCustom extends java.lang.Object implements SpotifyService {
+
+}
 
 export class TNSSpotifySearch {
   public static CURRENT_LIST: any;
@@ -12,24 +21,54 @@ export class TNSSpotifySearch {
 
   public static QUERY(query: string, queryType: string, offset: number = 0): Promise<any> {
 
-    if (!TNSSpotifySearch.apiInstance) {
-      console.log(`TNSSpotifySearch.apiInstance`);
-      console.log(`SpotifyApi`);
-      console.log(SpotifyApi);
-      TNSSpotifySearch.apiInstance = new SpotifyApi();
-      console.log(TNSSpotifySearch.apiInstance);
-    }
-    for (let key in TNSSpotifySearch.apiInstance) {
+    // if (!TNSSpotifySearch.apiInstance) {
+    //   console.log(`TNSSpotifySearch.apiInstance`);
+    //   console.log(`SpotifyApi`);
+    //   console.log(SpotifyApi);
+    //   TNSSpotifySearch.apiInstance = new SpotifyApi();
+    //   console.log(TNSSpotifySearch.apiInstance);
+    // }
+    // for (let key in TNSSpotifySearch.apiInstance) {
+    //   console.log(key);
+    // }
+    // console.log('access token:');
+    // console.log(TNSSpotifyAuth.SESSION);
+    // TNSSpotifySearch.apiInstance.setAccessToken(TNSSpotifyAuth.SESSION);
+    // console.log(`just set token.`);
+    // console.log(TNSSpotifySearch.apiInstance.getService);
+    // console.log(TNSSpotifySearch.apiInstance.getService());
+    // let serviceApi = TNSSpotifySearch.apiInstance.getService();
+    // console.log(`serviceApi:`);
+    // console.log(serviceApi);
+
+
+    // MANUAL
+    let httpExecutor = Executors.newSingleThreadExecutor();
+    console.log(`httpExecutor`);
+    console.log(httpExecutor);
+    let callbackExecutor = new MainThreadExecutor();
+    console.log(`callbackExecutor`);
+    console.log(callbackExecutor);
+    let restAdapter = new RestAdapter.Builder()
+      .setLogLevel(RestAdapter.LogLevel.BASIC)
+      .setExecutors(httpExecutor, callbackExecutor)
+      .setEndpoint("https://api.spotify.com/v1")
+      .setRequestInterceptor(new RequestInterceptor({
+        intercept: (request) => {
+          request.addHeader("Authorization", "Bearer " + TNSSpotifyAuth.SESSION);
+        }
+      }))
+      .build();
+    console.log(`restAdapter`);
+    console.log(restAdapter);
+    console.log(`SpotifyService`);
+    console.log(SpotifyService);
+    for (let key in SpotifyService) {
       console.log(key);
+      console.log(SpotifyService[key]);
     }
-    console.log('access token:');
-    console.log(TNSSpotifyAuth.SESSION);
-    TNSSpotifySearch.apiInstance.setAccessToken(TNSSpotifyAuth.SESSION);
-    console.log(`just set token.`);
-    console.log(TNSSpotifySearch.apiInstance.getService);
-    console.log(TNSSpotifySearch.apiInstance.getService());
-    let serviceApi = TNSSpotifySearch.apiInstance.getService();
-    console.log(`serviceApi:`);
+    let serviceApi = restAdapter.create(SpotifyService.class);
+    console.log(`serviceApi`);
     console.log(serviceApi);
 
     // query: search term

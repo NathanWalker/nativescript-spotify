@@ -65,6 +65,7 @@ export class TNSSpotifyAuth extends NSObject {
     
     // let url = SPTAuth.defaultInstance().loginURL;
     // UIApplication.sharedApplication().openURL(url);
+    TNSSpotifyAuth.AUTH_VIEW_SHOWING = true;
     let authvc = SPTAuthViewController.authenticationViewController();
     authvc.delegate = new TNSSpotifyAuthDelegate();
     if (TNSSpotifyAuth.CLEAR_COOKIES) {
@@ -75,8 +76,9 @@ export class TNSSpotifyAuth extends NSObject {
     let rootview = UIApplication.sharedApplication().keyWindow.rootViewController;
     rootview.modalPresentationStyle = UIModalPresentationCurrentContext;
     rootview.definesPresentationContext = true;
+    
     rootview.presentViewControllerAnimatedCompletion(authvc, true, null);
-    TNSSpotifyAuth.AUTH_VIEW_SHOWING = true;
+    
   }
   
   public static LOGOUT() {
