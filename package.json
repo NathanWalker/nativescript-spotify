@@ -1,13 +1,13 @@
 {
   "name": "nativescript-spotify",
-  "version": "1.4.9",
+  "version": "1.5.0",
   "description": "Spotify for your NativeScript app.",
   "main": "spotify.js",
   "typings": "spotify.d.ts",
   "nativescript": {
     "platforms": {
       "ios": "2.2.1",
-      "android": "2.2.1"
+      "android": "2.2.0"
     }
   },
   "scripts": {
