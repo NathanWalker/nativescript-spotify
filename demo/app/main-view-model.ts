@@ -110,8 +110,8 @@ export class SpotifyDemo extends Observable {
     });
   }
 
-  public updateTrackInfo() {
-    let metadata: TNSSpotifyTrackMetadataI = this._spotify.currentTrackMetadata();
+  public updateTrackInfo(trackInfo?: any) {
+    let metadata: TNSSpotifyTrackMetadataI = trackInfo || this._spotify.currentTrackMetadata();
     this.set(`albumName`, `Album: ${metadata.albumName}`);
     this.set(`albumUri`, `Album URI: ${metadata.albumUri}`);
     this.set(`artistName`, `Artist: ${metadata.artistName}`);
@@ -263,7 +263,7 @@ export class SpotifyDemo extends Observable {
 
   private updateAlbumArt(url: string) {
     this.set(`currentAlbumUrl`, url);
-    this.updateTrackInfo();
+    // this.updateTrackInfo();
   }
 
   private updateLogin(status: boolean) {
@@ -313,6 +313,13 @@ export class SpotifyDemo extends Observable {
     })
   }
 
+  private changedPlaybackState(e: any) {
+    console.log('changedPlaybackState...');
+    if (e && e.currentTrack) {
+        this.updateTrackInfo(e.currentTrack);
+    }
+  }
+
   private setupEvents() {
     this._spotify.events.on('albumArtChange', (eventData) => {
       this.updateAlbumArt(eventData.data.url);
@@ -322,6 +329,13 @@ export class SpotifyDemo extends Observable {
     });
     this._spotify.events.on('changedPlaybackStatus', (eventData) => {
       this.playNextTrack();
+    });
+    this._spotify.events.on('changedPlaybackState', (eventData) => {
+      this.changedPlaybackState(eventData.data.state);
+    });
+    
+    this._spotify.events.on('stoppedPlayingTrack', (eventData) => {
+      console.log('stoppedPlayingTrack');
     });
     this._spotify.auth.events.on('authLoginChange', (eventData) => {
       this.updateLogin(eventData.data.status);

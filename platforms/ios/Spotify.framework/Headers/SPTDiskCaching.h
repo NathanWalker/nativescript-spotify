@@ -27,11 +27,6 @@ FOUNDATION_EXPORT const NSUInteger SPTDiskCacheBlockSize;
 @protocol SPTCacheData <NSObject>
 
 /**
- * @brief The URI of the cached object.
- */
-@property (nonatomic, copy) NSURL *URI;
-
-/**
  * @brief The unique identifier for the cached object.
  */
 @property (nonatomic, copy) NSString *itemID;
@@ -72,8 +67,7 @@ FOUNDATION_EXPORT const NSUInteger SPTDiskCacheBlockSize;
  * @param offset The offset of the cached data.
  * @return The cached data or `nil` if no cached data is available.
  */
-- (id <SPTCacheData>)readCacheDataWithURI:(NSURL *)URI
-                                   itemID:(NSString *)itemID
+- (id <SPTCacheData>)readCacheDataWithKey:(NSString*)key
                                    length:(NSUInteger)length
                                    offset:(NSUInteger)offset;
 

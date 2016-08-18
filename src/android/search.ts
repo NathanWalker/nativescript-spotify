@@ -67,7 +67,7 @@ export class TNSSpotifySearch {
       console.log(key);
       console.log(SpotifyService[key]);
     }
-    let serviceApi = restAdapter.create(SpotifyService.class);
+    let serviceApi = restAdapter.create(kaaes.spotify.webapi.android.SpotifyService.class);
     console.log(`serviceApi`);
     console.log(serviceApi);
 

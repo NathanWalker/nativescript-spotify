@@ -15,6 +15,7 @@ export class TNSSpotifyPlayer extends NSObject {
   private _albumArtChange: EventData;
   private _playerReady: EventData;
   private _changedPlaybackStatus: EventData;
+  private _changedPlaybackState: EventData;
   private _seekedToOffset: EventData;
   private _changedVolume: EventData;
   private _changedShuffleStatus: EventData;
@@ -141,6 +142,16 @@ export class TNSSpotifyPlayer extends NSObject {
     if (this.events) {
       this._changedPlaybackStatus.data.playing = playing;
       this.events.notify(this._changedPlaybackStatus);  
+    }
+  }
+
+  public audioStreamingDidChangePlaybackState(controller: any, state: any) {
+    console.log(`DidChangePlaybackState: ${state}`);
+    if (this.events) {
+      this._changedPlaybackState.data.state = state;
+      this.events.notify(this._changedPlaybackState);  
+      this.updateCoverArt(state.currentTrack.albumUri);
+      // this.updateCoverArt(state.currentTrack.albumCoverArtUri);     
     }
   }
   
@@ -307,8 +318,9 @@ export class TNSSpotifyPlayer extends NSObject {
   
   private playUri(track: string, resolve: Function, reject: Function) {
     // https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAudioStreamingController.html
-
-    this.player.playURICallback(NSURL.URLWithString(track), (error) => {
+    console.log(track);
+    // this.player.playURICallback(NSURL.URLWithString(track), (error) => {
+    this.player.playURIStartingWithIndexCallback(NSURL.URLWithString(track), 0, (error) => {
       if (error != null) {
         console.log(`*** playURICallback got error:`);
         console.log(error);
@@ -338,7 +350,8 @@ export class TNSSpotifyPlayer extends NSObject {
       if (!this._started) {
         let errorRef = new interop.Reference();
         this.player = SPTAudioStreamingController.sharedInstance();
-        if (this.player.startWithClientIdError(TNSSpotifyConstants.CLIENT_ID, errorRef)) {
+        // if (this.player.startWithClientIdError(TNSSpotifyConstants.CLIENT_ID, errorRef)) {
+        if (this.player.startWithClientIdAudioControllerAllowCachingError(TNSSpotifyConstants.CLIENT_ID, null, true, errorRef)) {
           this._started = true;
           this.player.delegate = this;
           this.player.playbackDelegate = this;
@@ -377,7 +390,7 @@ export class TNSSpotifyPlayer extends NSObject {
         }
         
         // albumObj: SPTAlbum = https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAlbum.html
-
+ 
         this._currentAlbumImageUrl = albumObj.largestCover.imageURL.absoluteString;
         if (this.events) {
           this._albumArtChange.data.url = this._currentAlbumImageUrl;
@@ -452,6 +465,12 @@ export class TNSSpotifyPlayer extends NSObject {
       eventName: 'changedPlaybackStatus',
       data: {
         playing: false
+      }
+    };
+    this._changedPlaybackState = {
+      eventName: 'changedPlaybackState',
+      data: {
+        state: {}
       }
     };
     this._seekedToOffset = {
