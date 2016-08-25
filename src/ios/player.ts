@@ -43,6 +43,7 @@ export class TNSSpotifyPlayer extends NSObject {
   private _started: boolean = false;
   private _loggedIn: boolean = false;
   private _playerLoggedIn: boolean = false;
+  private _loggingInPromise: any;
 
   // constructor - iOS extending NSObject: The TypeScript constructor "TNSSpotifyPlayer" will not be executed.  
   // therefore: initPlayer must be used
@@ -118,23 +119,23 @@ export class TNSSpotifyPlayer extends NSObject {
     return this._loadedTrack;
   }
   
-  public currentTrackMetadata(): TNSSpotifyTrackMetadataI {
-    // https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAudioStreamingController.html#//api/name/currentTrackMetadata
-    if (this.player && this.player.currentTrackMetadata) {
-      let metadata: TNSSpotifyTrackMetadataI = {
-        albumName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumName'),
-        albumUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumURI'),
-        artistName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataArtistName'),
-        artistUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataArtistURI'),
-        trackDuration: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataTrackDuration'),
-        trackName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataTrackName'),
-        trackUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataTrackURI')
-      };
-      return metadata;
-    } else {
-      return {};
-    }
-  }
+  // public currentTrackMetadata(): TNSSpotifyTrackMetadataI {
+  //   // https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAudioStreamingController.html#//api/name/currentTrackMetadata
+  //   if (this.player && this.player.currentTrackMetadata) {
+  //     let metadata: TNSSpotifyTrackMetadataI = {
+  //       albumName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumName'),
+  //       albumUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumURI'),
+  //       artistName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataArtistName'),
+  //       artistUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataArtistURI'),
+  //       trackDuration: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataTrackDuration'),
+  //       trackName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataTrackName'),
+  //       trackUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataTrackURI')
+  //     };
+  //     return metadata;
+  //   } else {
+  //     return {};
+  //   }
+  // }
   
   // Delegate methods
   public audioStreamingDidChangePlaybackStatus(controller: any, playing: boolean) {
@@ -287,6 +288,27 @@ export class TNSSpotifyPlayer extends NSObject {
     }
   }
 
+  public audioStreamingDidLogin() {
+    console.log(`audioStreamingDidLogin`);
+    this._playerLoggedIn = true;
+    let handlePromise = (success) => {
+      if (this._loggingInPromise) {
+        if (success) {
+          this._loggingInPromise.resolve();
+        } else {
+          this._loggingInPromise.reject();
+        }
+        this._loggingInPromise = undefined;
+      }
+    };
+    // check if user is non-premium
+    TNSSpotifyAuth.CHECK_PREMIUM().then(() => {
+      handlePromise(true);
+    }, () => {
+      handlePromise(false);
+    });
+  }
+
   public audioStreamingDidLogout(controller: any) {
     console.log(`audioStreamingDidLogout`);
     let errorRef = new interop.Reference();
@@ -305,10 +327,6 @@ export class TNSSpotifyPlayer extends NSObject {
   private play(track: string): Promise<any> {
     return new Promise((resolve, reject) => {
       this.checkPlayer().then(() => {
-        if (!this._playerLoggedIn) { 
-          this.player.loginWithAccessToken(TNSSpotifyAuth.SESSION.accessToken);
-          this._playerLoggedIn = true;
-        } 
         this.playUri(track, resolve, reject);
       }, () => {
         reject('login');
@@ -361,8 +379,17 @@ export class TNSSpotifyPlayer extends NSObject {
             console.log(errorRef.description);
             printErrorRef(errorRef, false);
           } 
-          // check if user is non-premium
-          TNSSpotifyAuth.CHECK_PREMIUM().then(resolve, reject);
+
+          if (!this._playerLoggedIn) { 
+            this._loggingInPromise = {
+              resolve: resolve,
+              reject: reject
+            };
+            this.player.loginWithAccessToken(TNSSpotifyAuth.SESSION.accessToken);
+          } else {
+            TNSSpotifyAuth.CHECK_PREMIUM().then(resolve, reject);
+          }
+
         } else {
           this._started = false;
           if (errorRef) {

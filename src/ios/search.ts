@@ -41,6 +41,10 @@ export class TNSSpotifySearch {
         
         TNSSpotifySearch.CURRENT_LIST = results;
         console.log(results);
+        // for (let key in results) {
+        //   console.log(`key: ${key}`);
+        //   console.log(results[key]);
+        // }
         if (results && results.items) {
           let result: any = {
             page: offset,
@@ -59,7 +63,7 @@ export class TNSSpotifySearch {
         }
       };
 
-      console.log(`TNSSpotifySearch.QUERY offset: ${offset}`);
+      console.log(`TNSSpotifySearch.QUERY searching for: ${query}, offset: ${offset}`);
       TNSSpotifyAuth.VERIFY_SESSION(TNSSpotifyAuth.SESSION).then(() => {
         if (!reset && offset > 0 && TNSSpotifySearch.CURRENT_LIST) {
 
@@ -70,7 +74,7 @@ export class TNSSpotifySearch {
           
         } else {
 
-          SPTSearch.performSearchWithQueryQueryTypeOffsetAccessTokenCallback(NSURL.URLWithString(query), queryType, offset, TNSSpotifyAuth.SESSION.accessToken, processResults);
+          SPTSearch.performSearchWithQueryQueryTypeOffsetAccessTokenCallback(query, queryType, offset, TNSSpotifyAuth.SESSION.accessToken, processResults);
         }
 
       }, () => {

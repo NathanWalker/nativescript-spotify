@@ -17,8 +17,11 @@
           <Image src="{{currentAlbumUrl}}" class="cover" id="album-art" /> 
           <Image src="~/assets/login-btn.png" tap="{{login}}" visibility="{{loggedIn ? 'collapsed' : 'visible'}}" class="login-btn"/> 
           <Button text="{{playBtnTxt}}" tap="{{togglePlay}}" visibility="{{loggedIn ? 'visible' : 'collapsed'}}" class="play-btn"/>
-          <Button text="GET PLAYER STATE" tap="{{ getPlayerState }}" visibility="{{loggedIn ? 'visible' : 'collapsed'}}" />
-          
+         
+          <android>
+            <Button text="GET PLAYER STATE" tap="{{ getPlayerState }}" visibility="{{loggedIn ? 'visible' : 'collapsed'}}" />
+          </android>
+
           <GridLayout columns="*,*" rows="auto" visibility="{{loggedIn ? 'visible' : 'collapsed'}}">
             <Button id="ns-playlist" row="0" col="0" text="Natively Scripting" tap="{{viewPlaylist}}" class="view-track view-playlist" color="{{playlistNSActive}}"/>
             <Button id="tr-playlist" row="0" col="1" text="Thoughtram Zone" tap="{{viewThoughtram}}" class="view-track view-playlist" color="{{playlistTRActive}}"/>

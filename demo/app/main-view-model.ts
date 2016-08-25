@@ -110,15 +110,15 @@ export class SpotifyDemo extends Observable {
     });
   }
 
-  public updateTrackInfo(trackInfo?: any) {
-    let metadata: TNSSpotifyTrackMetadataI = trackInfo || this._spotify.currentTrackMetadata();
-    this.set(`albumName`, `Album: ${metadata.albumName}`);
-    this.set(`albumUri`, `Album URI: ${metadata.albumUri}`);
-    this.set(`artistName`, `Artist: ${metadata.artistName}`);
-    this.set(`artistUri`, `Artist URI: ${metadata.artistUri}`);
-    this.set(`trackDuration`, `Duration: ${metadata.trackDuration}`);
-    this.set(`trackName`, `Track: ${metadata.trackName}`);
-    this.set(`trackUri`, `Track URI: ${metadata.trackUri}`);
+  public updateTrackInfo(trackInfo: any) {
+    // let metadata: TNSSpotifyTrackMetadataI = trackInfo || this._spotify.currentTrackMetadata();
+    this.set(`albumName`, `Album: ${trackInfo.albumName}`);
+    this.set(`albumUri`, `Album URI: ${trackInfo.albumUri}`);
+    this.set(`artistName`, `Artist: ${trackInfo.artistName}`);
+    this.set(`artistUri`, `Artist URI: ${trackInfo.artistUri}`);
+    this.set(`trackDuration`, `Duration: ${trackInfo.durationMs}`);
+    this.set(`trackName`, `Track: ${trackInfo.name}`);
+    this.set(`trackUri`, `Track URI: ${trackInfo.uri}`);
   }
 
   public viewPlaylist(args: EventData, uri?: string) {
@@ -316,6 +316,10 @@ export class SpotifyDemo extends Observable {
   private changedPlaybackState(e: any) {
     console.log('changedPlaybackState...');
     if (e && e.currentTrack) {
+      // for (let key in e.currentTrack) {
+      //   console.log(`key: ${key}`);
+      //   console.log(e.currentTrack[key]);
+      // }
         this.updateTrackInfo(e.currentTrack);
     }
   }

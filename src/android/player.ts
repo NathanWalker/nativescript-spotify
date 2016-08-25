@@ -154,22 +154,22 @@ export class TNSSpotifyPlayer {
     return this._loadedTrack;
   }
 
-  public currentTrackMetadata(): TNSSpotifyTrackMetadataI {
-    if (this.player && this.player.currentTrackMetadata) {
-      let metadata: TNSSpotifyTrackMetadataI = {
-        albumName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumName'),
-        albumUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumURI'),
-        artistName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataArtistName'),
-        artistUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataArtistURI'),
-        trackDuration: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataTrackDuration'),
-        trackName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataTrackName'),
-        trackUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataTrackURI')
-      };
-      return metadata;
-    } else {
-      return {};
-    }
-  }
+  // public currentTrackMetadata(): TNSSpotifyTrackMetadataI {
+  //   if (this.player && this.player.currentTrackMetadata) {
+  //     let metadata: TNSSpotifyTrackMetadataI = {
+  //       albumName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumName'),
+  //       albumUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumURI'),
+  //       artistName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataArtistName'),
+  //       artistUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataArtistURI'),
+  //       trackDuration: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataTrackDuration'),
+  //       trackName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataTrackName'),
+  //       trackUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataTrackURI')
+  //     };
+  //     return metadata;
+  //   } else {
+  //     return {};
+  //   }
+  // }
 
   // Delegate methods
   public audioStreamingDidChangePlaybackStatus(controller: any, playing: boolean) {
