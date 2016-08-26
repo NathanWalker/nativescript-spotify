@@ -3,6 +3,7 @@ import {TNSSpotifyConstants, TNSSpotifyTrackMetadataI, Utils} from '../common';
 import {TNSSpotifyAuth} from './auth';
 import * as dialogs from 'ui/dialogs';
 import * as app from 'application';
+import * as http from 'http';
 
 declare var com: any;
 let Config = com.spotify.sdk.android.player.Config
@@ -22,6 +23,7 @@ export class TNSSpotifyPlayer {
   private _albumArtChange: EventData;
   private _playerReady: EventData;
   private _changedPlaybackStatus: EventData;
+  private _changedPlaybackState: EventData;
   private _seekedToOffset: EventData;
   private _changedVolume: EventData;
   private _changedShuffleStatus: EventData;
@@ -51,6 +53,7 @@ export class TNSSpotifyPlayer {
   private _playerLoggedIn: boolean = false;
   private _playing: boolean = false;
   private _playerHandler: any;
+  private _trackTimeout: any;
 
   public initPlayer(emitEvents?: boolean) {
 
@@ -171,15 +174,6 @@ export class TNSSpotifyPlayer {
   //   }
   // }
 
-  // Delegate methods
-  public audioStreamingDidChangePlaybackStatus(controller: any, playing: boolean) {
-    console.log(`DidChangePlaybackStatus: ${playing}`);
-    if (this.events) {
-      this._changedPlaybackStatus.data.playing = playing;
-      this.events.notify(this._changedPlaybackStatus);
-    }
-  }
-
   private play(track: string): Promise<any> {
     return new Promise((resolve, reject) => {
       this.checkPlayer().then(() => {
@@ -204,7 +198,6 @@ export class TNSSpotifyPlayer {
   private checkPlayer(): Promise<boolean> {
     return new Promise((resolve, reject) => {
       if (!this._started) {
-
         let activity = app.android.startActivity || app.android.foregroundActivity;
         let playerConfig: any = new Config(activity, TNSSpotifyAuth.SESSION, TNSSpotifyConstants.CLIENT_ID);
         let builder = new Builder(playerConfig);
@@ -223,8 +216,11 @@ export class TNSSpotifyPlayer {
             // this.player.addPlayerNotificationCallback(activity);
 
             // check if user is non-premium
-            // TNSSpotifyAuth.CHECK_PREMIUM().then(resolve, reject);
-            resolve();
+            TNSSpotifyAuth.CHECK_PREMIUM().then(() => {
+              resolve();
+            }, () => {
+              reject();
+            });
           }
         });
 
@@ -236,13 +232,81 @@ export class TNSSpotifyPlayer {
         this.player.addPlayerNotificationCallback(new PlayerNotificationCallback({
 
           onPlaybackEvent: (eventType, playerState) => {
-            console.log('EVENT TYPE: ' + eventType);
-            console.log('PLAYER STATE: ' + playerState);
+            console.log('EVENT TYPE: ', eventType);
+            console.log('PLAYER STATE: ', playerState);
+            // if (playerState) {
+            //   for (let key in playerState) {
+            //     console.log(`key: ${key}`, playerState[key]);
+            //   }
+            // }
+      
+            // let diff = playerState.durationInMs - playerState.positionInMs;
+            // only dispatch track details when new tracks play or when < 400 ms to the end of playback
+            // console.log(eventType === PlayerNotificationCallback.EventType.TRACK_CHANGED);
+            // console.log(PlayerNotificationCallback.EventType.TRACK_END);
+
+            if (this._loadedTrack && (eventType == PlayerNotificationCallback.EventType.TRACK_CHANGED || eventType == PlayerNotificationCallback.EventType.END_OF_CONTEXT)) {
+              eventType = eventType == PlayerNotificationCallback.EventType.END_OF_CONTEXT ? 'TRACK_END' : eventType;
+              if (this.events && playerState.trackUri) {
+                if (this._trackTimeout) {
+                  clearTimeout(this._trackTimeout);
+                }
+                this._trackTimeout = setTimeout(() => {
+                  let trackId = playerState.trackUri.split(':').slice(-1);
+                  console.log(`trackId: ${trackId}`);
+                  http.request({
+                    url: `https://api.spotify.com/v1/tracks/${trackId}`,
+                    method: 'GET',
+                    headers: { "Content-Type": "application/json", "Authorization:": `Bearer ${TNSSpotifyAuth.SESSION}` }
+                  }).then((res: any) => {
+                    // console.log(`track data...`);
+                    // for (let key in res) {
+                    //   console.log(`key: ${key}`, res[key]);
+                    // }
+                    if (res && res.content) {
+                      let track = JSON.parse(res.content);
+
+                      // for (let key in track) {
+                      //   console.log(`key: ${key}`, track[key]);
+                      // }
+                    
+                      this._changedPlaybackState.data.state = {
+                        currentTrack: {
+                          uri: track.uri,
+                          name: track.name,
+                          albumName: track.album.name,
+                          artistName: track.artists[0].name,
+                          durationMs: track.duration_ms,
+                          positionInMs: playerState.positionInMs,
+                          eventType: eventType
+                        }
+                      };
+                      this.events.notify(this._changedPlaybackState); 
+                      setTimeout(() => {
+                        if (track.album && track.album.images) {
+                          this._albumArtChange.data.url = track.album.images[0].url;
+                          // console.log(`album url: ${this._albumArtChange.data.url}`);
+                          this.events.notify(this._albumArtChange);  
+                        }
+                      }, 100); 
+                    }
+                  }, (err: any) => {
+                    console.log(`track data error:`, err);
+                  });
+                }, 500);
+                
+              }
+            }
           },
 
           onPlaybackError: (errorType, errorDetails) => {
-            console.log('ERROR TYPE: ' + errorType);
-            console.log('ERROR DETAILS: ' + errorDetails);
+            console.log('ERROR TYPE: ', errorType);
+            console.log('ERROR DETAILS: ', errorDetails);
+            if (errorDetails) {
+              for (let key in errorDetails) {
+                console.log(`key: ${key}`, errorDetails[key]);
+              }
+            }
           }
 
         }));
@@ -251,30 +315,6 @@ export class TNSSpotifyPlayer {
       } else {
         resolve();
       }
-    });
-  }
-
-
-  private updateCoverArt(albumUri: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      resolve();
-      // SPTAlbum.albumWithURISessionCallback(NSURL.URLWithString(albumUri), TNSSpotifyAuth.SESSION, (error, albumObj: any) => {
-      //   if (error != null) {
-      //     console.log(`*** albumWithURISessionCallback got error:`);
-      //     console.log(error);
-      //     reject();
-      //     return;
-      //   }
-
-      //   // albumObj: SPTAlbum = https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAlbum.html
-
-      //   this._currentAlbumImageUrl = albumObj.largestCover.imageURL.absoluteString;
-      //   if (this.events) {
-      //     this._albumArtChange.data.url = this._currentAlbumImageUrl;
-      //     this.events.notify(this._albumArtChange);  
-      //   }
-      //   resolve();
-      // });
     });
   }
 
@@ -337,6 +377,12 @@ export class TNSSpotifyPlayer {
       eventName: 'changedPlaybackStatus',
       data: {
         playing: false
+      }
+    };
+    this._changedPlaybackState = {
+      eventName: 'changedPlaybackState',
+      data: {
+        state: {}
       }
     };
     this._seekedToOffset = {

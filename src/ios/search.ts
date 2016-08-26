@@ -55,6 +55,7 @@ export class TNSSpotifySearch {
             case 'track':
               result.tracks = TNSSpotifySearch.TRACKS_FROM_RESULTS(results)
               break;
+            // TODO: support other query types
           }
           resolve(result);
         } else {
@@ -70,6 +71,8 @@ export class TNSSpotifySearch {
           if (TNSSpotifySearch.CURRENT_LIST.hasNextPage) {
             // get next page
             TNSSpotifySearch.CURRENT_LIST.requestNextPageWithAccessTokenCallback(TNSSpotifyAuth.SESSION.accessToken, processResults);
+          } else {
+            resolve({}); // resolve empty object - not an error, just no more results
           }          
           
         } else {

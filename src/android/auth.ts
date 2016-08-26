@@ -4,6 +4,7 @@ import {AndroidActivityResultEventData} from "application";
 import * as dialogs from 'ui/dialogs';
 import * as app from "application";
 import * as appSettings from "application-settings";
+import * as http from 'http';
 
 declare var com: any;
 
@@ -195,17 +196,49 @@ export class TNSSpotifyAuth {
     }
 
     public static CURRENT_USER(): Promise<any> {
-        console.log('DONT SEE ANDROID EQUIVALENT OF THIS');
-        return new Promise((resolve, reject) => { 
-          resolve();
+      return new Promise((resolve, reject) => { 
+        http.request({
+          url: `https://api.spotify.com/v1/me`,
+          method: 'GET',
+          headers: { "Content-Type": "application/json", "Authorization:": `Bearer ${TNSSpotifyAuth.SESSION}` }
+        }).then((res: any) => {
+          // console.log(`got current user:`, res);
+          // for (let key in res) {
+          //   console.log(`key: ${key}`, res[key]);
+          // }
+          if (res && res.content) {
+            resolve(JSON.parse(res.content));
+          } else {
+            reject();
+          }       
+        }, (err: any) => {
+          console.log(`current user error:`, err);
+          for (let key in err) {
+            console.log(`key: ${key}`, err[key]);
+          }
+          reject(err);
         });
+      });
     }
 
     public static CHECK_PREMIUM(): Promise<any> {
-        console.log('DONT SEE ANDROID EQUIVALENT OF THIS');
-        return new Promise((resolve, reject) => { 
-          resolve();
-        });
+      return new Promise((resolve, reject) => { 
+        TNSSpotifyAuth.CURRENT_USER().then((user: any) => {
+          // console.log(`user.product:`, user.product);
+          if (user && user.product) {
+            if (user.product == 'premium' || user.product == 'unlimited') {
+              resolve();
+            } else {
+              dialogs.alert(TNSSpotifyAuth.PREMIUM_MSG);
+              TNSSpotifyAuth.CLEAR_COOKIES = true;
+              TNSSpotifyAuth.LOGOUT();
+              reject();   
+            }
+          } else {
+            reject();
+          }
+        }, reject);
+      });
     }
 
     private setupNotifications() {

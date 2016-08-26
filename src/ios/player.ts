@@ -369,11 +369,11 @@ export class TNSSpotifyPlayer extends NSObject {
         let errorRef = new interop.Reference();
         this.player = SPTAudioStreamingController.sharedInstance();
         // if (this.player.startWithClientIdError(TNSSpotifyConstants.CLIENT_ID, errorRef)) {
-        if (this.player.startWithClientIdAudioControllerAllowCachingError(TNSSpotifyConstants.CLIENT_ID, null, true, errorRef)) {
+        if (this.player.startWithClientIdAudioControllerAllowCachingError(TNSSpotifyConstants.CLIENT_ID, null, false, errorRef)) {
           this._started = true;
           this.player.delegate = this;
           this.player.playbackDelegate = this;
-          this.player.diskCache = SPTDiskCache.alloc().initWithCapacity(1024 * 1024 * 64);
+          // this.player.diskCache = SPTDiskCache.alloc().initWithCapacity(1024 * 1024 * 64);
           
           if (errorRef) {
             console.log(errorRef.description);

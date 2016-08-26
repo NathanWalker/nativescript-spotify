@@ -1,6 +1,7 @@
 import {Observable, EventData} from 'data/observable';
 import {Page} from 'ui/page';
 import {topmost} from 'ui/frame';
+import {isAndroid} from 'platform';
 import {AnimationCurve} from 'ui/enums';
 import {LoadingIndicator} from 'nativescript-loading-indicator';
 import {

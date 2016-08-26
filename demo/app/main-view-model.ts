@@ -147,12 +147,14 @@ export class SpotifyDemo extends Observable {
 
 
   public getPlayerState() {
-    try {
-      this._spotify.getPlayerState().then((resp) => {
-        console.log('PLAYER STATE: ' + JSON.stringify(resp));
-      });
-    } catch (err) {
-      console.log(err);
+    if (isAndroid) {
+      try {
+        (<any>this._spotify).getPlayerState().then((resp) => {
+          console.log('PLAYER STATE: ' + JSON.stringify(resp));
+        });
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 

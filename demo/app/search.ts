@@ -12,4 +12,12 @@ function pageLoaded(args) {
     navigationBar.barStyle = 1;
   }
 }
+
+function btnLoaded(e: any) {
+  if (isAndroid) {
+    let btn = e.object;
+    btn.android.setFocusable(false);
+  }
+}
 exports.pageLoaded = pageLoaded;
+exports.btnLoaded = btnLoaded;

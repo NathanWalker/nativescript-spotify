@@ -15,6 +15,9 @@ Image {
   font-size: 30;
   color:#fff;
 }
+.search-bar {
+  background-color:white;
+}
 
 .login-btn {
   margin:20 0 20 0;
