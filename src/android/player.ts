@@ -47,7 +47,7 @@ class CustomAudioController extends AudioController {
           channels,
           2); //android.media.AudioFormat.ENCODING_PCM_16BIT
 
-      console.log("Creating size", size);
+      // console.log("Creating size", size);
 
       // Create Track
       this.audioTrack = new android.media.AudioTrack(
@@ -66,7 +66,7 @@ class CustomAudioController extends AudioController {
     }
     //console.log("Writting data", numFrames);
     let newSize = this.audioTrack.write(frames, 0, numFrames);
-    console.log("Wrote data: ", newSize);
+    // console.log("Wrote data: ", newSize);
     return newSize;
   }
 
@@ -251,9 +251,9 @@ export class TNSSpotifyPlayer {
       if (this._audioController) {
         this._audioController.setVolume(val);
         resolve();
-        return;
+      } else {
+        reject();
       }
-      reject();
     });
   }
 
