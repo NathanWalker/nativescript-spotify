@@ -147,9 +147,9 @@ export class TNSSpotifyAuth {
                 if (checkExisting) {
                     console.log(`error renewing, calling TNSSpotifyAuth.LOGOUT()`);
                     TNSSpotifyAuth.LOGOUT();
-                    setTimeout(() => {
-                        dialogs.alert('Please re-login.');
-                    });
+                    // setTimeout(() => {
+                    //     dialogs.alert('Please re-login.');
+                    // });
                 }
                 reject();
             };
@@ -207,7 +207,11 @@ export class TNSSpotifyAuth {
           //   console.log(`key: ${key}`, res[key]);
           // }
           if (res && res.content) {
-            resolve(JSON.parse(res.content));
+            let user = JSON.parse(res.content);
+            // for (let key in user) {
+            //   console.log(`key: ${key}`, user[key]);
+            // }
+            resolve(user);
           } else {
             reject();
           }       
@@ -229,7 +233,9 @@ export class TNSSpotifyAuth {
             if (user.product == 'premium' || user.product == 'unlimited') {
               resolve();
             } else {
-              dialogs.alert(TNSSpotifyAuth.PREMIUM_MSG);
+              setTimeout(() => {
+                dialogs.alert(TNSSpotifyAuth.PREMIUM_MSG);
+              }, 400);
               TNSSpotifyAuth.CLEAR_COOKIES = true;
               TNSSpotifyAuth.LOGOUT();
               reject();   

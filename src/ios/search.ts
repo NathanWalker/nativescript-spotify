@@ -89,43 +89,52 @@ export class TNSSpotifySearch {
   public static TRACKS_FROM_RESULTS(results: any): Array<TNSTrack> {
     // console.log(`TRACKS_FROM_RESULTS`);
     // console.log(results);
-    let itemNSArray = results.items;
-    
-    // console.log(itemNSArray);
-    let cnt = itemNSArray.count;
-    // console.log(`track cnt: ${cnt}`);
     let items = [];
-    for (let i = 0; i < cnt; i++) {
-      let trackObj = itemNSArray.objectAtIndex(i);
-      // console.log(trackObj.name);
-      let spotifyArtist = trackObj.artists.objectAtIndex(0);
-      let artist = {};
-      // if uri is null, skip as it cannot be played
-      // console.log(spotifyArtist.uri);
-      if (spotifyArtist && spotifyArtist.uri && spotifyArtist.uri != 'null') {
-        artist = {
-          id: spotifyArtist.identifier,
-          name: spotifyArtist.name
-        };
-        let spotifyAlbum = trackObj.album;
-        let album = {};
-        if (spotifyAlbum) {
-          album = {
-            id: spotifyAlbum.identifier,
-            name: spotifyAlbum.name
-          };
+    let cnt = 0;
+
+    if (results && results.items) {
+      let itemNSArray = results.items;
+      // console.log(itemNSArray);
+      cnt = itemNSArray.count;
+      // console.log(`track cnt: ${cnt}`);
+      
+      if (cnt > 0) {
+        for (let i = 0; i < cnt; i++) {
+          let trackObj = itemNSArray.objectAtIndex(i);
+          // console.log(trackObj.name);
+          let spotifyArtist = null;
+          if (trackObj && trackObj.artists && trackObj.artists.count > 0) {
+            spotifyArtist = trackObj.artists.objectAtIndex(0);
+            let artist = {};
+            // if uri is null, skip as it cannot be played
+            // console.log(spotifyArtist.uri);
+            if (spotifyArtist && spotifyArtist.uri && spotifyArtist.uri != 'null') {
+              artist = {
+                id: spotifyArtist.identifier,
+                name: spotifyArtist.name
+              };
+              let spotifyAlbum = trackObj.album;
+              let album = {};
+              if (spotifyAlbum) {
+                album = {
+                  id: spotifyAlbum.identifier,
+                  name: spotifyAlbum.name
+                };
+              }
+              
+              let track: TNSTrack = {
+                id: trackObj.identifier,
+                name: trackObj.name,
+                artist: artist,
+                duration: trackObj.duration,
+                album: album,
+                playing: false
+              };
+              items.push(track);
+              // console.log(`adding: ${i}`);
+            }
+          }
         }
-        
-        let track: TNSTrack = {
-          id: trackObj.identifier,
-          name: trackObj.name,
-          artist: artist,
-          duration: trackObj.duration,
-          album: album,
-          playing: false
-        };
-        items.push(track);
-        // console.log(`adding: ${i}`);
       }
     }
     return items;

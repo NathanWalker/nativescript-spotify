@@ -139,9 +139,9 @@ export class TNSSpotifyAuth extends NSObject {
         if (checkExisting) {
           console.log(`error renewing, calling TNSSpotifyAuth.LOGOUT()`);
           TNSSpotifyAuth.LOGOUT();
-          setTimeout(() => {
-            dialogs.alert('Please re-login.');
-          });
+          // setTimeout(() => {
+          //   dialogs.alert('Please re-login.');
+          // });
         }
         reject();
       };
@@ -225,7 +225,9 @@ export class TNSSpotifyAuth extends NSObject {
 
           console.log(`User Product: ${user.product}`);
           if (user.product == 0 || user.product == 3) {
-            dialogs.alert(TNSSpotifyAuth.PREMIUM_MSG);
+            setTimeout(() => {
+              dialogs.alert(TNSSpotifyAuth.PREMIUM_MSG);
+            }, 400);
             TNSSpotifyAuth.CLEAR_COOKIES = true;
             TNSSpotifyAuth.LOGOUT();
             reject();
