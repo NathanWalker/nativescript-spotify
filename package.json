@@ -42,6 +42,13 @@
     "type": "MIT",
     "url": "https://github.com/NathanWalker/nativescript-spotify/blob/master/LICENSE"
   },
+  "contributors": [
+    {
+      "name": "Nathanael Anderson",
+      "email": "nathan@master-technology.com",
+      "url": "https://github.com/NathanaelA"
+    }
+  ],
   "homepage": "https://github.com/NathanWalker/nativescript-spotify",
   "readmeFilename": "README.md",
   "devDependencies": {
