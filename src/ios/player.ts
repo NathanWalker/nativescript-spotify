@@ -118,6 +118,23 @@ export class TNSSpotifyPlayer extends NSObject {
   public loadedTrack(): string {
     return this._loadedTrack;
   }
+
+  public setVolume(val: number): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (this.player) {
+        this.player.setVolumeCallback(val, (error) => {
+          if (error !== null) {
+            console.log(`Spotify Player volume adjust error:`, error);
+            reject(error);
+            return;
+          }
+          resolve();
+        });
+      } else {
+        reject();
+      }
+    });
+  }
   
   // public currentTrackMetadata(): TNSSpotifyTrackMetadataI {
   //   // https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAudioStreamingController.html#//api/name/currentTrackMetadata

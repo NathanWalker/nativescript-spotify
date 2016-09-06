@@ -15,90 +15,91 @@ let PlayerState = com.spotify.sdk.android.player.PlayerState;
 let PlayerStateCallback = com.spotify.sdk.android.player.PlayerStateCallback;
 let PlayerNotificationCallback = com.spotify.sdk.android.player.PlayerNotificationCallback;
 let Builder = com.spotify.sdk.android.player.Player.Builder;
+let AudioController = com.spotify.sdk.android.player.AudioController;
 
 
-class AudioController extends com.spotify.sdk.android.player.AudioController {
+class CustomAudioController extends AudioController {
 
-      private audioTrack: any;
-      private savedVolume: any;
-      public constructor() {
-         super();
-         this.audioTrack = null;
-         this.savedVolume = null;
-         return global.__native(this);
+  private audioTrack: any;
+  private savedVolume: any;
+  public constructor() {
+      super();
+      this.audioTrack = null;
+      this.savedVolume = null;
+      return global.__native(this);
+  }
+
+  public start(): void {
+    console.log("Starting");
+  }
+
+  public stop(): void {
+    console.log("Stopping");
+  }
+
+  public onAudioDataDelivered (frames, numFrames, sampleRate, channels): any {
+    //console.log("onAudioDataDelivered", numFrames);
+    if (!this.audioTrack) {
+
+      // Figure out how much buffer to have.
+      let size = android.media.AudioTrack.getMinBufferSize(
+          sampleRate,
+          channels,
+          2); //android.media.AudioFormat.ENCODING_PCM_16BIT
+
+      console.log("Creating size", size);
+
+      // Create Track
+      this.audioTrack = new android.media.AudioTrack(
+          android.media.AudioManager.STREAM_MUSIC,
+          sampleRate,
+          channels,
+          2, //android.media.AudioFormat.ENCODING_PCM_16BIT
+          size,
+          android.media.AudioTrack.MODE_STREAM);
+
+      if (this.savedVolume !== null) {
+        this.audioTrack.setVolume(this.savedVolume);
       }
 
-      public start(): void {
-        console.log("Starting");
-      }
-
-      public stop(): void {
-        console.log("Stopping");
-      }
-
-      public onAudioDataDelivered (frames, numFrames, sampleRate, channels): any {
-        //console.log("onAudioDataDelivered", numFrames);
-        if (!this.audioTrack) {
-
-          // Figure out how much buffer to have.
-          let size = android.media.AudioTrack.getMinBufferSize(
-              sampleRate,
-              channels,
-              android.media.AudioFormat.ENCODING_PCM_16BIT);
-
-          console.log("Creating size", size);
-
-          // Create Track
-          this.audioTrack = new android.media.AudioTrack(
-              android.media.AudioManager.STREAM_MUSIC,
-              sampleRate,
-              channels,
-              android.media.AudioFormat.ENCODING_PCM_16BIT,
-              size,
-              android.media.AudioTrack.MODE_STREAM);
-
-          if (this.savedVolume !== null) {
-            this.audioTrack.setVolume(this.savedVolume);
-          }
-
-          this.audioTrack.play();
-        }
-        //console.log("Writting data", numFrames);
-        let newSize = this.audioTrack.write(frames, 0, numFrames);
-        console.log("Wrote data: ", newSize);
-        return newSize;
-      }
-
-      onAudioFlush(): void {
-        console.log("Flushing");
-        if (this.audioTrack) {
-          this.audioTrack.flush();
-        }
-      }
-
-      onAudioPaused(): void {
-        console.log("Pausing");
-        if (this.audioTrack) {
-          this.audioTrack.pause();
-        }
-
-      }
-
-      onAudioResumed(): void {
-        console.log("Resuming");
-        if (this.audioTrack) {
-          this.audioTrack.play();
-        }
-      }
-
-      setVolume(val: number): void {
-        if (this.audioTrack) {
-          this.audioTrack.setVolume(val);
-        }
-        this.savedVolume = val;
-      }
-
+      this.audioTrack.play();
     }
+    //console.log("Writting data", numFrames);
+    let newSize = this.audioTrack.write(frames, 0, numFrames);
+    console.log("Wrote data: ", newSize);
+    return newSize;
+  }
+
+  onAudioFlush(): void {
+    console.log("Flushing");
+    if (this.audioTrack) {
+      this.audioTrack.flush();
+    }
+  }
+
+  onAudioPaused(): void {
+    console.log("Pausing");
+    if (this.audioTrack) {
+      this.audioTrack.pause();
+    }
+
+  }
+
+  onAudioResumed(): void {
+    console.log("Resuming");
+    if (this.audioTrack) {
+      this.audioTrack.play();
+    }
+  }
+
+  setVolume(val: number): void {
+    if (this.audioTrack) {
+      this.audioTrack.setVolume(val);
+    }
+    this.savedVolume = val;
+  }
+
+}
 
 
 export class TNSSpotifyPlayer {
@@ -141,7 +142,7 @@ export class TNSSpotifyPlayer {
   private _playing: boolean = false;
   private _playerHandler: any;
   private _trackTimeout: any;
-  private _audioController: AudioController;
+  private _audioController: CustomAudioController;
 
   public initPlayer(emitEvents?: boolean) {
 
@@ -245,10 +246,15 @@ export class TNSSpotifyPlayer {
     return this._loadedTrack;
   }
 
-  public setVolume(val: number) {
-    if (this._audioController) {
-      this._audioController.setVolume(val);
-    }
+  public setVolume(val: number): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (this._audioController) {
+        this._audioController.setVolume(val);
+        resolve();
+        return;
+      }
+      reject();
+    });
   }
 
   // public currentTrackMetadata(): TNSSpotifyTrackMetadataI {
@@ -295,7 +301,7 @@ export class TNSSpotifyPlayer {
         let activity = app.android.startActivity || app.android.foregroundActivity;
         let playerConfig: any = new Config(activity, TNSSpotifyAuth.SESSION, TNSSpotifyConstants.CLIENT_ID);
         let builder = new Builder(playerConfig);
-        this._audioController = new AudioController();
+        this._audioController = new CustomAudioController();
         builder.setAudioController(this._audioController);
 
         let observer = new Player.InitializationObserver({

@@ -38,6 +38,7 @@ export class SpotifyDemo extends Observable {
   public accountInfoBtnTxt: string;
   public playlistNSActive: string;
   public playlistTRActive: string;
+  public volumeValue: number;
 
   // State  
   private _spotify: TNSSpotifyPlayer;
@@ -67,6 +68,16 @@ export class SpotifyDemo extends Observable {
     this.metadataBtnTxt = this._chevronDown;
     this.accountInfoBtnTxt = this._userIcon;
     this.playlistNSActive = this.playlistTRActive = '#ffffff';
+    this.set('volumeValue', 100);
+    this.on(Observable.propertyChangeEvent, (data: any) => {
+      // for (let key in data) {
+      //   console.log(`key: ${key}`, data[key]);
+      // }
+      if (data.propertyName === 'volumeValue') {
+        this._spotify.setVolume(data.value * .01);
+      }
+      
+    });
   }
 
   public login() {

@@ -170,6 +170,7 @@ Method |  Description
 `togglePlay(track?: string)`: `Promise<any>` | Allows toggle play/pause on a track, or changing a track. `track` must be a valid spotify track uri. [Learn more here](https://developer.spotify.com/web-api/user-guide/#spotify-uris-and-ids) 
 `isPlaying()`: `boolean` | Determine if player is currently playing
 `isLoggedIn()`: `boolean` | Determine if player is authenticated
+`setVolume(value: number)`: `Promise<any>` | Set the player volume
 `loadedTrack()`: `string` | Determine current loaded track (spotify track uri)
 `currentTrackMetadata()`: `TNSSpotifyTrackMetadataI` | Get the current track's metadata. [Learn more here](https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAudioStreamingController.html#//api/name/currentTrackMetadata)
 

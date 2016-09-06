@@ -1,6 +1,6 @@
 {
   "name": "nativescript-spotify",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "description": "Spotify for your NativeScript app.",
   "main": "spotify.js",
   "typings": "spotify.d.ts",
@@ -47,6 +47,11 @@
       "name": "Nathanael Anderson",
       "email": "nathan@master-technology.com",
       "url": "https://github.com/NathanaelA"
+    },
+    {
+      "name": "Brad Martin",
+      "email": "bradwaynemartin@gmail.com",
+      "url": "https://github.com/bradmartin"
     }
   ],
   "homepage": "https://github.com/NathanWalker/nativescript-spotify",

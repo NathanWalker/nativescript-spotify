@@ -19,6 +19,7 @@
           <Button text="{{playBtnTxt}}" tap="{{togglePlay}}" visibility="{{loggedIn ? 'visible' : 'collapsed'}}" class="play-btn"/>
          
           <android>
+            <Slider minValue="0" maxValue="100" value="{{ volumeValue }}" visibility="{{loggedIn ? 'visible' : 'collapsed'}}" />
             <Button text="GET PLAYER STATE" tap="{{ getPlayerState }}" visibility="{{loggedIn ? 'visible' : 'collapsed'}}" />
           </android>
 
