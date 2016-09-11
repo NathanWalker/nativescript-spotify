@@ -87,28 +87,33 @@ export class TNSSpotifyPlaylist {
       let items = [];
       let cnt = 0;
 
-      if (results && results.items) {
-        let itemNSArray = results.items;
-        cnt = itemNSArray.count;
-        
-        if (cnt > 0) {
-          for (let i = 0; i < cnt; i++) {
-            let playlistObj = itemNSArray.objectAtIndex(i);
-            // for (let key in playlistObj) {
-            //   console.log(key);
-            //   console.log(playlistObj[key]);
-            // }
-            let playlist: TNSPlaylist = {
-              uri: playlistObj.uri.absoluteString,
-              name: playlistObj.name,
-              tracks: [],
-              playing: false
-            };
-            console.log(`playlist name: ${playlist.name}`);
-            items.push(playlist);
+      try {
+        if (results && results.items) {
+          let itemNSArray = results.items;
+          cnt = itemNSArray.count;
+          
+          if (cnt > 0) {
+            for (let i = 0; i < cnt; i++) {
+              let playlistObj = itemNSArray.objectAtIndex(i);
+              // for (let key in playlistObj) {
+              //   console.log(key);
+              //   console.log(playlistObj[key]);
+              // }
+              let playlist: TNSPlaylist = {
+                uri: playlistObj.uri.absoluteString,
+                name: playlistObj.name,
+                tracks: [],
+                playing: false
+              };
+              console.log(`playlist name: ${playlist.name}`);
+              items.push(playlist);
+            }
           }
-        }
-      } 
+        } 
+      } catch (err) {
+        console.log(`TNSSpotifyPlaylist.PLAYLISTS_FROM_RESULTS error:`);
+        console.log(err);
+      }   
 
       // fetch all tracks from all playlists      
       cnt = 0;

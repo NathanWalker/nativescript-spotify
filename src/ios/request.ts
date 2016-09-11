@@ -20,11 +20,19 @@ export class TNSSpotifyRequest {
   
   public static TRACKS_FROM_PLAYLIST(playlist: any): Array<any> {
     let trackNSArray = playlist.firstTrackPage.tracksForPlayback();
-    let cnt = trackNSArray.count;
+    let cnt = 0;
     let tracks = [];
-    for (let i = 0; i < cnt; i++) {
-      let track = trackNSArray.objectAtIndex(i);
-      tracks.push(track);
+    try {
+      if (trackNSArray) {
+        cnt = trackNSArray.count;
+        for (let i = 0; i < cnt; i++) {
+          let track = trackNSArray.objectAtIndex(i);
+          tracks.push(track);
+        }
+      }
+    } catch (err) {
+      console.log(`TNSSpotifyRequest.TRACKS_FROM_PLAYLIST error:`);
+      console.log(err);
     }
     return tracks;
   }
