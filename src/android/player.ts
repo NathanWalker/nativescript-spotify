@@ -292,7 +292,7 @@ export class TNSSpotifyPlayer {
     this.player.play(track);
     this._loadedTrack = track;
     this._playing = true;
-    resolve();
+    resolve(true);
   }
 
   private checkPlayer(): Promise<boolean> {
@@ -441,6 +441,10 @@ export class TNSSpotifyPlayer {
         this._started = false;
         console.log(`TODO: player dispose()`);
         this.player.logout();
+        setTimeout(() => {
+          // https://developer.spotify.com/android-sdk-docs/player/
+          Spotify.destroyPlayer(this.player);
+        }, 1000);
       }
 
     }

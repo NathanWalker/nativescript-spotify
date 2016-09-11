@@ -1,6 +1,6 @@
 ![alt text](resources/spotify.jpg "Spotify")
 
-A NativeScript plugin for the Spotify iOS and (*coming soon* Android) SDK.
+A NativeScript plugin for the Spotify iOS and Android SDKs.
 
 * [Install](#install)
 * [Prerequisites](#prerequisites)
@@ -25,7 +25,7 @@ npm install nativescript-spotify --save
 ### Background
 
 * Based on the [Spotify iOS SDK Beta 13](https://github.com/spotify/ios-sdk/releases)
-* Android coming soon and will be based on [Spotify Android SDK 1.0.0-beta12](https://github.com/spotify/android-sdk/releases)
+* Android based on [Spotify Android SDK 1.0.0-beta13](https://github.com/spotify/android-sdk/releases)
 
 ## Usage
 
@@ -132,6 +132,12 @@ Sample 1 |  Sample 2
 Sample 3 | Sample 4
 -------- | -------
 ![Sample3](screenshots/3.png) | ![Sample4](screenshots/4.png)
+
+#### Android
+
+### Setup
+
+* Docs coming soon for Android...
 
 ## Documentation
 

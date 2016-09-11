@@ -53,9 +53,14 @@ export class TNSSpotifyAuth {
             'playlist-modify-public',
             'playlist-read-collaborative']);
 
-        if (TNSSpotifyAuth.CLEAR_COOKIES) {
-            AuthenticationClient.clearCookies(app.android.currentContext);
-        }
+        // if (TNSSpotifyAuth.CLEAR_COOKIES) {
+        //     AuthenticationClient.clearCookies(app.android.currentContext);
+        // }
+        // TODO: investigate - may just need different context
+        // The above throws this
+        // Error: java.lang.IllegalArgumentException: Invalid context argument
+        //JS:     android.webkit.CookieSyncManager.createInstance(CookieSyncManager.java:95)
+        //JS:     com.spotify.sdk.android.authentication.WebViewUtils.clearCookiesForDomain(WebViewUtils.java:45)
 
         let request = builder.build();
         let activity = app.android.startActivity || app.android.foregroundActivity;
@@ -108,7 +113,7 @@ export class TNSSpotifyAuth {
     public static LOGOUT() {
       console.log(`TNSSpotifyAuth.LOGOUT()`);
         TNSSpotifyAuth.SESSION = undefined;
-        AuthenticationClient.clearCookies(app.android.currentContext);
+        // AuthenticationClient.clearCookies(app.android.currentContext);
         if (TNSSpotifyAuth.instance && TNSSpotifyAuth.instance.events) {
             TNSSpotifyAuth.instance._authLoginChange.data.status = false;
             TNSSpotifyAuth.instance.events.notify(TNSSpotifyAuth.instance._authLoginChange);
