@@ -7,6 +7,7 @@ import * as http from 'http';
 
 declare var com: any;
 declare var android: any;
+declare var TimeUnit: any;
 
 let Config = com.spotify.sdk.android.player.Config
 let Spotify = com.spotify.sdk.android.player.Spotify;
@@ -298,6 +299,25 @@ export class TNSSpotifyPlayer {
   private checkPlayer(): Promise<boolean> {
     return new Promise((resolve, reject) => {
       if (!this._started) {
+
+        if (this.player) {
+          try {
+            console.log(`calling Spotify.destroyPlayer...`);
+            // https://developer.spotify.com/android-sdk-docs/player/
+            let activity = app.android.startActivity || app.android.foregroundActivity;
+            Spotify.destroyPlayer(activity);
+            console.log(`TimeUnit:`);
+            console.log(TimeUnit);
+
+            if (typeof TimeUnit !== 'undefined')            
+              this.player.awaitTermination(10, TimeUnit.SECONDS);
+          } catch (err) {
+            console.log(`Spotify.destroyPlayer catch:`);
+            console.log(err);
+          }
+          this.player = undefined;
+        }
+
         let activity = app.android.startActivity || app.android.foregroundActivity;
         let playerConfig: any = new Config(activity, TNSSpotifyAuth.SESSION, TNSSpotifyConstants.CLIENT_ID);
         let builder = new Builder(playerConfig);
@@ -441,19 +461,6 @@ export class TNSSpotifyPlayer {
       this._started = false;
       console.log(`TODO: player dispose()`);
       // this.player.logout();
-      if (this.player) {
-        setTimeout(() => {
-          try {
-            console.log(`calling Spotify.destroyPlayer...`);
-            // https://developer.spotify.com/android-sdk-docs/player/
-            Spotify.destroyPlayer(this.player);
-
-          } catch (err) {
-            console.log(`Spotify.destroyPlayer catch:`);
-            console.log(err);
-          }
-        }, 500);
-      }
     }
   }
 
