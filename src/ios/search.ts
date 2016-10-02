@@ -1,5 +1,5 @@
 import {TNSSpotifyAuth} from './auth';
-import {TNSTrack} from '../common';
+import {ISpotifyTrack} from '../common';
 
 declare var SPTSearch, NSURL;
 
@@ -86,7 +86,7 @@ export class TNSSpotifySearch {
     });
   }
   
-  public static TRACKS_FROM_RESULTS(results: any): Array<TNSTrack> {
+  public static TRACKS_FROM_RESULTS(results: any): Array<ISpotifyTrack> {
     // console.log(`TRACKS_FROM_RESULTS`);
     // console.log(results);
     let items = [];
@@ -123,7 +123,7 @@ export class TNSSpotifySearch {
                   };
                 }
                 
-                let track: TNSTrack = {
+                let track: ISpotifyTrack = {
                   id: trackObj.identifier,
                   name: trackObj.name,
                   artist: artist,

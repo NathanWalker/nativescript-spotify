@@ -9,7 +9,7 @@ import {
   TNSSpotifyAuth,
   TNSSpotifyPlayer,
   TNSSpotifySearch,
-  TNSTrack,
+  ISpotifyTrack,
   Utils
 } from 'nativescript-spotify';
 
@@ -18,7 +18,7 @@ export class SpotifySearchDemo extends Observable {
   // UI  
   public footerNote: string = "<span style='font-family: sans-serif; background-color:#000; color:#fff;'>Demo by <a href='https://github.com/NathanWalker' style='color:#A6CE40;'>Nathan Walker</a></span>";
   public loggedIn: boolean = false;
-  public searchResults: Array<TNSTrack>;
+  public searchResults: Array<ISpotifyTrack>;
 
   // State  
   private _spotify: TNSSpotifyPlayer;  

@@ -10,7 +10,7 @@ import {
   TNSSpotifyPlayer,
   TNSSpotifyPlaylist,
   TNSSpotifyRequest,
-  TNSSpotifyTrackMetadataI,
+  ISpotifyTrackMetadata,
   Utils
 } from 'nativescript-spotify';
 
@@ -122,7 +122,7 @@ export class SpotifyDemo extends Observable {
   }
 
   public updateTrackInfo(trackInfo: any) {
-    // let metadata: TNSSpotifyTrackMetadataI = trackInfo || this._spotify.currentTrackMetadata();
+    // let metadata: ISpotifyTrackMetadata = trackInfo || this._spotify.currentTrackMetadata();
     this.set(`albumName`, `Album: ${trackInfo.albumName}`);
     this.set(`albumUri`, `Album URI: ${trackInfo.albumUri}`);
     this.set(`artistName`, `Artist: ${trackInfo.artistName}`);

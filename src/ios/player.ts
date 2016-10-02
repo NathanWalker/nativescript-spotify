@@ -1,5 +1,5 @@
 import {Observable, EventData} from 'data/observable';
-import {TNSSpotifyConstants, TNSSpotifyTrackMetadataI, Utils} from '../common';
+import {TNSSpotifyConstants, ISpotifyTrackMetadata, Utils} from '../common';
 import {TNSSpotifyAuth} from './auth';
 import * as dialogs from 'ui/dialogs';
 
@@ -136,10 +136,10 @@ export class TNSSpotifyPlayer extends NSObject {
     });
   }
   
-  // public currentTrackMetadata(): TNSSpotifyTrackMetadataI {
+  // public currentTrackMetadata(): ISpotifyTrackMetadata {
   //   // https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAudioStreamingController.html#//api/name/currentTrackMetadata
   //   if (this.player && this.player.currentTrackMetadata) {
-  //     let metadata: TNSSpotifyTrackMetadataI = {
+  //     let metadata: ISpotifyTrackMetadata = {
   //       albumName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumName'),
   //       albumUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumURI'),
   //       artistName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataArtistName'),

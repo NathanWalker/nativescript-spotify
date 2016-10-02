@@ -1,5 +1,5 @@
 import {Observable, EventData} from 'data/observable';
-import {TNSSpotifyConstants} from '../common';
+import {TNSSpotifyConstants, ISpotifyUser} from '../common';
 import {AndroidActivityResultEventData} from "application";
 import * as dialogs from 'ui/dialogs';
 import * as app from "application";
@@ -200,7 +200,7 @@ export class TNSSpotifyAuth {
         });
     }
 
-    public static CURRENT_USER(): Promise<any> {
+    public static CURRENT_USER(): Promise<ISpotifyUser> {
       return new Promise((resolve, reject) => { 
         http.request({
           url: `https://api.spotify.com/v1/me`,
@@ -216,7 +216,30 @@ export class TNSSpotifyAuth {
             // for (let key in user) {
             //   console.log(`key: ${key}`, user[key]);
             // }
-            resolve(user);
+
+            // 0: 'free'
+            // 1: 'unlimited'
+            // 2: 'premium'
+            // 3: 'unknown'
+            let product: number = 0;
+            switch (user.product) {
+              case 'unlimited':
+                product = 1;
+                break;
+              case 'premium':
+                product = 2;
+                break;
+              case 'unknown':
+                product = 3;
+                break;
+            }
+            let sUser: ISpotifyUser = {
+              emailAddress: user.email,
+              displayName: user.display_name,
+              product: product,
+              uri: user.uri
+            };
+            resolve(sUser);
           } else {
             reject();
           }       
@@ -234,8 +257,8 @@ export class TNSSpotifyAuth {
       return new Promise((resolve, reject) => { 
         TNSSpotifyAuth.CURRENT_USER().then((user: any) => {
           // console.log(`user.product:`, user.product);
-          if (user && user.product) {
-            if (user.product == 'premium' || user.product == 'unlimited') {
+          if (user) {
+            if (user.product == 0 || user.product == 3) {
               resolve();
             } else {
               setTimeout(() => {

@@ -178,7 +178,7 @@ Method |  Description
 `isLoggedIn()`: `boolean` | Determine if player is authenticated
 `setVolume(value: number)`: `Promise<any>` | Set the player volume
 `loadedTrack()`: `string` | Determine current loaded track (spotify track uri)
-`currentTrackMetadata()`: `TNSSpotifyTrackMetadataI` | Get the current track's metadata. [Learn more here](https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAudioStreamingController.html#//api/name/currentTrackMetadata)
+`currentTrackMetadata()`: `ISpotifyTrackMetadata` | Get the current track's metadata. [Learn more here](https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTAudioStreamingController.html#//api/name/currentTrackMetadata)
 
 #### Events
 

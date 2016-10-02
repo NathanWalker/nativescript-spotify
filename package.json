@@ -1,13 +1,13 @@
 {
   "name": "nativescript-spotify",
-  "version": "1.5.11",
+  "version": "1.6.0",
   "description": "Spotify for your NativeScript app.",
   "main": "spotify.js",
   "typings": "spotify.d.ts",
   "nativescript": {
     "platforms": {
-      "ios": "2.2.1",
-      "android": "2.2.0"
+      "ios": "2.3.0",
+      "android": "2.3.0"
     }
   },
   "scripts": {
@@ -57,8 +57,8 @@
   "homepage": "https://github.com/NathanWalker/nativescript-spotify",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "tns-core-modules": "^2.2.1",
-    "tns-platform-declarations": "^2.2.0",
+    "tns-core-modules": "next",
+    "tns-platform-declarations": "^2.3.0",
     "typescript": "^1.8.10"
   }
 }

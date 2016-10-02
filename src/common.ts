@@ -1,7 +1,14 @@
 import * as app from 'application';
 import * as dialogs from 'ui/dialogs';
 
-export interface TNSSpotifyTrackMetadataI {
+export interface ISpotifyUser {
+  displayName: string;
+  emailAddress: string;
+  uri: string;
+  product: number;
+} 
+
+export interface ISpotifyTrackMetadata {
   albumName?: string;
   albumUri?: string;
   artistName?: string;
@@ -11,7 +18,7 @@ export interface TNSSpotifyTrackMetadataI {
   trackUri?: string;
 }
 
-export interface TNSTrack {
+export interface ISpotifyTrack {
   id: string;
   name: string;
   artist: any;
@@ -20,7 +27,7 @@ export interface TNSTrack {
   playing: boolean;
 }
 
-export interface TNSPlaylist {
+export interface ISpotifyPlaylist {
   uri: string;
   name: string;
   tracks: any;

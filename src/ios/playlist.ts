@@ -1,6 +1,6 @@
 import {TNSSpotifyAuth} from './auth';
 import {TNSSpotifySearch} from './search';
-import {TNSPlaylist} from '../common';
+import {ISpotifyPlaylist} from '../common';
 
 declare var SPTPlaylistList, SPTPlaylistSnapshot;
 
@@ -99,7 +99,7 @@ export class TNSSpotifyPlaylist {
               //   console.log(key);
               //   console.log(playlistObj[key]);
               // }
-              let playlist: TNSPlaylist = {
+              let playlist: ISpotifyPlaylist = {
                 uri: playlistObj.uri.absoluteString,
                 name: playlistObj.name,
                 tracks: [],
@@ -152,7 +152,7 @@ export class TNSSpotifyPlaylist {
     });
   }
 
-  public static GET_TRACKS(trackList: any, playlist: TNSPlaylist): Promise<any> {
+  public static GET_TRACKS(trackList: any, playlist: ISpotifyPlaylist): Promise<any> {
     return new Promise((resolve, reject) => {
       let currentPage = trackList;
 

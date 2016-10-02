@@ -1,5 +1,5 @@
 import {Observable, EventData} from 'data/observable';
-import {TNSSpotifyConstants, TNSSpotifyTrackMetadataI, Utils} from '../common';
+import {TNSSpotifyConstants, ISpotifyTrackMetadata, Utils} from '../common';
 import {TNSSpotifyAuth} from './auth';
 import * as dialogs from 'ui/dialogs';
 import * as app from 'application';
@@ -257,9 +257,9 @@ export class TNSSpotifyPlayer {
     });
   }
 
-  // public currentTrackMetadata(): TNSSpotifyTrackMetadataI {
+  // public currentTrackMetadata(): ISpotifyTrackMetadata {
   //   if (this.player && this.player.currentTrackMetadata) {
-  //     let metadata: TNSSpotifyTrackMetadataI = {
+  //     let metadata: ISpotifyTrackMetadata = {
   //       albumName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumName'),
   //       albumUri: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataAlbumURI'),
   //       artistName: this.player.currentTrackMetadata.valueForKey('SPTAudioStreamingMetadataArtistName'),
@@ -437,16 +437,22 @@ export class TNSSpotifyPlayer {
     this._loggedIn = value;
     if (!value) {
       this._playerLoggedIn = false;
-      if (this._started) {
-        this._started = false;
-        console.log(`TODO: player dispose()`);
-        this.player.logout();
+      this._started = false;
+      console.log(`TODO: player dispose()`);
+      // this.player.logout();
+      if (this.player) {
         setTimeout(() => {
-          // https://developer.spotify.com/android-sdk-docs/player/
-          Spotify.destroyPlayer(this.player);
-        }, 1000);
-      }
+          try {
+            console.log(`calling Spotify.destroyPlayer...`);
+            // https://developer.spotify.com/android-sdk-docs/player/
+            Spotify.destroyPlayer(this.player);
 
+          } catch (err) {
+            console.log(`Spotify.destroyPlayer catch:`);
+            console.log(err);
+          }
+        }, 500);
+      }
     }
   }
 

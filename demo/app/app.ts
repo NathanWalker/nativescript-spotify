@@ -7,6 +7,7 @@ import {TNSSpotifyConstants, TNSSpotifyAuth} from 'nativescript-spotify';
 TNSSpotifyConstants.CLIENT_ID = 'your spotify client id here';
 TNSSpotifyAuth.REDIRECT_URL = 'tnsspotify://spotifylogin';
 
+
 /// iOS
 if (isIOS) {
   class MyDelegate extends UIResponder {

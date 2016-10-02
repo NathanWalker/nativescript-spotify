@@ -1,6 +1,6 @@
 import {Observable, EventData} from 'data/observable';
 import * as dialogs from 'ui/dialogs';
-import {TNSSpotifyConstants} from '../common';
+import {TNSSpotifyConstants, ISpotifyUser} from '../common';
 import {TNSSpotifyNotificationObserver} from './notification';
 
 declare var SPTAuth, SPTAuthViewDelegate, SPTAuthViewController, SPTProduct, SPTSession, SPTUser, SPTAuthStreamingScope, SPTAuthUserReadPrivateScope, SPTAuthUserReadEmailScope, SPTAuthUserLibraryModifyScope, SPTAuthUserLibraryReadScope, SPTAuthPlaylistReadPrivateScope, SPTAuthPlaylistModifyPrivateScope, SPTAuthPlaylistModifyPublicScope, UIApplication, NSURL, NSUserDefaults, NSNotificationCenter, NSKeyedArchiver, NSKeyedUnarchiver, UIModalPresentationOverCurrentContext, UIModalTransitionStyleCrossDissolve, UIModalPresentationCurrentContext;
@@ -15,7 +15,7 @@ class TNSSpotifyAuthDelegate extends NSObject {
 
   public authenticationViewControllerDidFailToLogin(ctrl, error) {
     console.log(error);
-    NSNotificationCenter.defaultCenter().postNotificationNameObject(TNSSpotifyConstants.NOTIFY_LOGIN_ERROR, error);
+    NSNotificationCenter.defaultCenter.postNotificationNameObject(TNSSpotifyConstants.NOTIFY_LOGIN_ERROR, error);
   }
 
   public authenticationViewControllerDidCancelLogin(ctrl) {
@@ -64,7 +64,7 @@ export class TNSSpotifyAuth extends NSObject {
     // SPTAuth.defaultInstance().requestedScopes = [SPTAuthStreamingScope, SPTAuthUserReadPrivateScope, SPTAuthUserReadEmailScope, SPTAuthUserLibraryModifyScope, SPTAuthUserLibraryReadScope, SPTAuthPlaylistReadPrivateScope, SPTAuthPlaylistModifyPrivateScope, SPTAuthPlaylistModifyPublicScope, 'playlist-read-collaborative']; // no constant for last one: https://github.com/spotify/ios-sdk/issues/423
     
     // let url = SPTAuth.defaultInstance().loginURL;
-    // UIApplication.sharedApplication().openURL(url);
+    // UIApplication.sharedApplication.openURL(url);
     TNSSpotifyAuth.AUTH_VIEW_SHOWING = true;
     let authvc = SPTAuthViewController.authenticationViewController();
     authvc.delegate = new TNSSpotifyAuthDelegate();
@@ -73,7 +73,7 @@ export class TNSSpotifyAuth extends NSObject {
     }
     authvc.modalPresentationStyle = UIModalPresentationOverCurrentContext;
     authvc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-    let rootview = UIApplication.sharedApplication().keyWindow.rootViewController;
+    let rootview = UIApplication.sharedApplication.keyWindow.rootViewController;
     rootview.modalPresentationStyle = UIModalPresentationCurrentContext;
     rootview.definesPresentationContext = true;
     
@@ -83,15 +83,15 @@ export class TNSSpotifyAuth extends NSObject {
   
   public static LOGOUT() {
     TNSSpotifyAuth.SESSION = undefined;
-    let userDefaults = NSUserDefaults.standardUserDefaults();
+    let userDefaults = NSUserDefaults.standardUserDefaults;
     userDefaults.removeObjectForKey(TNSSpotifyConstants.KEY_STORE_SESSION);
     userDefaults.synchronize();
-    NSNotificationCenter.defaultCenter().postNotificationNameObject(TNSSpotifyConstants.NOTIFY_AUTH_LOGIN_CHANGE, false);
+    NSNotificationCenter.defaultCenter.postNotificationNameObject(TNSSpotifyConstants.NOTIFY_AUTH_LOGIN_CHANGE, false);
   }
   
   public static HANDLE_AUTH_CALLBACK(url) {
     // Ask SPTAuth if the URL given is a Spotify authentication callback
-    NSNotificationCenter.defaultCenter().postNotificationNameObject(TNSSpotifyConstants.NOTIFY_LOGIN_CHECK, null);
+    NSNotificationCenter.defaultCenter.postNotificationNameObject(TNSSpotifyConstants.NOTIFY_LOGIN_CHECK, null);
     if (SPTAuth.defaultInstance().canHandleURL(url)) { 
       SPTAuth.defaultInstance().handleAuthCallbackWithTriggeredAuthURLCallback(url, (error, session) => {
         if (error != null) {
@@ -101,12 +101,12 @@ export class TNSSpotifyAuth extends NSObject {
 
         if (TNSSpotifyAuth.AUTH_VIEW_SHOWING) {
           // dismiss modal
-          let rootview = UIApplication.sharedApplication().keyWindow.rootViewController;
+          let rootview = UIApplication.sharedApplication.keyWindow.rootViewController;
           rootview.dismissViewControllerAnimatedCompletion(true, null);
           TNSSpotifyAuth.AUTH_VIEW_SHOWING = false;
         }
         TNSSpotifyAuth.SAVE_SESSION(session);
-        NSNotificationCenter.defaultCenter().postNotificationNameObject(TNSSpotifyConstants.NOTIFY_LOGIN_SUCCESS, null);
+        NSNotificationCenter.defaultCenter.postNotificationNameObject(TNSSpotifyConstants.NOTIFY_LOGIN_SUCCESS, null);
         return true;
       });
     }
@@ -115,7 +115,7 @@ export class TNSSpotifyAuth extends NSObject {
   public static LOGIN_WITH_SESSION(session) {
     TNSSpotifyAuth.CLEAR_COOKIES = false;
     TNSSpotifyAuth.SAVE_SESSION(session);
-    NSNotificationCenter.defaultCenter().postNotificationNameObject(TNSSpotifyConstants.NOTIFY_LOGIN_SUCCESS, null);
+    NSNotificationCenter.defaultCenter.postNotificationNameObject(TNSSpotifyConstants.NOTIFY_LOGIN_SUCCESS, null);
   }  
   
   public static VERIFY_SESSION(session?: any): Promise<any> {
@@ -166,7 +166,7 @@ export class TNSSpotifyAuth extends NSObject {
   
   public static SAVE_SESSION(session): void {
     TNSSpotifyAuth.SESSION = session;
-    let userDefaults = NSUserDefaults.standardUserDefaults();
+    let userDefaults = NSUserDefaults.standardUserDefaults;
     let sessionData = NSKeyedArchiver.archivedDataWithRootObject(session);
     userDefaults.setObjectForKey(sessionData, TNSSpotifyConstants.KEY_STORE_SESSION);
     userDefaults.synchronize();
@@ -174,7 +174,7 @@ export class TNSSpotifyAuth extends NSObject {
   
   public static GET_STORED_SESSION(): any {
     // https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTSession.html
-    let userDefaults = NSUserDefaults.standardUserDefaults();
+    let userDefaults = NSUserDefaults.standardUserDefaults;
     return userDefaults.objectForKey(TNSSpotifyConstants.KEY_STORE_SESSION);
   }
   
@@ -196,7 +196,7 @@ export class TNSSpotifyAuth extends NSObject {
     });
   }
   
-  public static CURRENT_USER(): Promise<any> {
+  public static CURRENT_USER(): Promise<ISpotifyUser> {
     // https://developer.spotify.com/ios-sdk-docs/Documents/Classes/SPTUser.html
     return new Promise((resolve, reject) => {
       if (TNSSpotifyAuth.SESSION) {
@@ -206,7 +206,13 @@ export class TNSSpotifyAuth extends NSObject {
             reject();
             return;
           }
-          resolve(user);
+          let sUser: ISpotifyUser = {
+            emailAddress: user.emailAddress,
+            displayName: user.displayName,
+            product: user.product,
+            uri: user.uri
+          };
+          resolve(sUser);
         });
       } else {
         reject();
@@ -282,7 +288,7 @@ export class TNSSpotifyAuth extends NSObject {
 
   private addNotificationObserver(notificationName: string, onReceiveCallback: (notification: NSNotification) => void): TNSSpotifyNotificationObserver {
     var observer = TNSSpotifyNotificationObserver.new().initWithCallback(onReceiveCallback);
-    NSNotificationCenter.defaultCenter().addObserverSelectorNameObject(observer, "onReceive", notificationName, null);
+    NSNotificationCenter.defaultCenter.addObserverSelectorNameObject(observer, "onReceive", notificationName, null);
     this._observers.push(observer);
     return observer;
   }

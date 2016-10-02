@@ -2,19 +2,19 @@
   "nativescript": {
     "id": "org.nativescript.demo",
     "tns-ios": {
-      "version": "2.2.1"
+      "version": "2.3.0"
     },
     "tns-android": {
-      "version": "2.2.0"
+      "version": "2.3.0"
     }
   },
   "scripts": {
     "demo": "tns livesync ios --emulator --watch --log trace"
   },
   "dependencies": {
-    "nativescript-loading-indicator": "^2.0.1",
+    "nativescript-loading-indicator": "^2.2.1",
     "nativescript-spotify": "file:..",
-    "tns-core-modules": "^2.2.0"
+    "tns-core-modules": "next"
   },
   "devDependencies": {
     "babel-traverse": "6.11.4",

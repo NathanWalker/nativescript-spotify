@@ -1,5 +1,5 @@
 import {TNSSpotifyAuth} from './auth';
-import {TNSTrack} from '../common';
+import {ISpotifyTrack} from '../common';
 import * as http from 'http';
 
 export class TNSSpotifySearch {
@@ -96,7 +96,7 @@ export class TNSSpotifySearch {
     });
   }
   
-  public static TRACKS_FROM_RESULTS(results: any): Array<TNSTrack> {
+  public static TRACKS_FROM_RESULTS(results: any): Array<ISpotifyTrack> {
     
     let items = [];
     console.log(`processing ${results.items.length} tracks...`);
@@ -121,7 +121,7 @@ export class TNSSpotifySearch {
           };
         }
         
-        let track: TNSTrack = {
+        let track: ISpotifyTrack = {
           id: trackObj.id,
           name: trackObj.name,
           artist: artist,

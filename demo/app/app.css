@@ -60,7 +60,6 @@ Image {
 
 .metadata,
 .account-info {
-  top:-300;
   left: 30;
   opacity:0;
   width:95%;

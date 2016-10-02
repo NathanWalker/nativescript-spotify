@@ -8,12 +8,15 @@
         "declaration": true,
         "noEmitOnError": false,
         "noEmitHelpers": true,
-        "noImplicitUseStrict": true
+        "noImplicitUseStrict": true,
+        "noLib": true
     },
     "files": [
+      "node_modules/typescript/lib/lib.core.d.ts",
+      "manual_typings/base.d.ts",
       "node_modules/tns-core-modules/tns-core-modules.d.ts",
       "node_modules/tns-platform-declarations/tns-core-modules/android17.d.ts",
-      "node_modules/tns-platform-declarations/tns-core-modules/ios.d.ts",
+      "node_modules/tns-platform-declarations/tns-core-modules/ios/ios.d.ts",
       "node_modules/tns-platform-declarations/tns-core-modules/org.nativescript.widgets.d.ts",
       "spotify.ios.ts",
       "spotify.android.ts"
