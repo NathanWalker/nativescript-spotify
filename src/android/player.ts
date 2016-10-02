@@ -319,6 +319,7 @@ export class TNSSpotifyPlayer {
 
             // check if user is non-premium
             TNSSpotifyAuth.CHECK_PREMIUM().then(() => {
+              console.log(`user is premium/unlimited...`);
               resolve();
             }, () => {
               reject();

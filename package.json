@@ -55,10 +55,5 @@
     }
   ],
   "homepage": "https://github.com/NathanWalker/nativescript-spotify",
-  "readmeFilename": "README.md",
-  "devDependencies": {
-    "tns-core-modules": "next",
-    "tns-platform-declarations": "^2.3.0",
-    "typescript": "^1.8.10"
-  }
+  "readmeFilename": "README.md"
 }

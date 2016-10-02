@@ -207,10 +207,10 @@ export class TNSSpotifyAuth {
           method: 'GET',
           headers: { "Content-Type": "application/json", "Authorization:": `Bearer ${TNSSpotifyAuth.SESSION}` }
         }).then((res: any) => {
-          // console.log(`got current user:`, res);
-          // for (let key in res) {
-          //   console.log(`key: ${key}`, res[key]);
-          // }
+        //   console.log(`got current user:`, res);
+        //   for (let key in res) {
+        //     console.log(`key: ${key}`, res[key]);
+        //   }
           if (res && res.content) {
             let user = JSON.parse(res.content);
             // for (let key in user) {
@@ -256,9 +256,9 @@ export class TNSSpotifyAuth {
     public static CHECK_PREMIUM(): Promise<any> {
       return new Promise((resolve, reject) => { 
         TNSSpotifyAuth.CURRENT_USER().then((user: any) => {
-          // console.log(`user.product:`, user.product);
+          console.log(`user.product:`, user.product);
           if (user) {
-            if (user.product == 0 || user.product == 3) {
+            if (user.product == 1 || user.product == 2) {
               resolve();
             } else {
               setTimeout(() => {
